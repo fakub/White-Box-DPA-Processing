@@ -1,0 +1,113 @@
+GRAPH_HEIGHT = 0x1000
+GRAPH_WIDTH = 0x400
+
+def add_node_to_plot(node, plot, addr_offset, row_offset, addr_div, row_div)
+	if node.has_key? :addr
+		plot.set((node[:row] - row_offset)/row_div, (node[:addr] - addr_offset)/addr_div, node[:length])
+	else
+		node.each do |key, val|
+			add_node_to_plot(val, plot, addr_offset, row_offset, addr_div, row_div)
+		end
+	end
+end
+
+def gen_view(filename, addr_from, addr_to, line_from, line_to, split_files, row_div_arg, addr_div_arg, verbose = false)
+	begin
+		h = {}
+		p = Plot.new
+		row = -1
+		
+		puts "\n\tFilling hash tree ..." if verbose   # fill hash tree
+		File.open(filename, 'rb').each do |line|
+			row += 1
+			next if row < line_from
+			
+			words = line.split(/\W+/)
+			addr = words[1].hex
+			next if addr < addr_from or addr > addr_to
+			
+			node = h
+			
+			(2*ADDR_LEN-1).downto(0) do |i|
+				k = ((addr >> (4*i)) & 0xf)
+				node[k] = {} unless node.has_key? k
+				node = node[k]
+			end
+			
+			node[:row] = row
+			node[:addr] = addr
+			node[:length] = words[2].hex
+			#~ node[:val] = words[3].hex
+			node[:val] = 1
+			node[:dumb0] = nil; node[:dumb1] = nil; node[:dumb2] = nil; node[:dumb3] = nil; node[:dumb4] = nil; node[:dumb5] = nil; node[:dumb6] = nil; node[:dumb7] = nil; node[:dumb8] = nil; node[:dumb9] = nil; node[:dumba] = nil; node[:dumbb] = nil; node[:dumbc] = nil; node[:dumbd] = nil; node[:dumbe] = nil; node[:dumbf] = nil;
+			
+			break if row > line_to
+		end
+		
+		row_div = row_div_arg.nil? ? ((row - line_from)/GRAPH_HEIGHT + 1) : row_div_arg.hex
+		
+		puts "\tSplitting tree ..." if verbose   # find important nodes
+		nodes = [h]
+		singletons = []
+		begin
+			# find a node with minimum subnodes
+			minimal = nodes.min_by{|node|node.length}
+			break if minimal.has_key?(:addr) or (nodes.length + minimal.length - 2 > split_files)
+			# replace it with these nodes
+			nodes.delete_if{|node|node == minimal}
+			minimal.each do |key, value|
+				nodes << value
+			end
+			# go deeper if any node has single subnode
+			begin
+				change = false
+				nodes.select{|no|no.length == 1}.each do |single|
+					nodes.delete_if{|node|node == single}
+					nodes << single.values.first
+					change = true
+				end
+			end while change
+			# move singletons
+			nodes.select{|no|no.has_key? :addr}.each do |singleton|
+				nodes.delete_if{|node|node == singleton}
+				singletons << singleton
+			end
+		end while nodes.length < split_files
+		
+		filenames = []
+		puts "\tGenerating plots ..." if verbose   # generate plots
+		nodes.each do |node|
+			puts "\t----------------\n\tStarting new node" if verbose
+			start = node
+			stop  = node
+			while not start.has_key? :addr
+				start = start[start.keys.sort.first]
+			end
+			while not stop.has_key? :addr
+				stop = stop[stop.keys.sort.last]
+			end
+			
+			addr_div = addr_div_arg.nil? ? ((stop[:addr] - start[:addr])/GRAPH_WIDTH + 1) : addr_div_arg.hex
+			
+			puts "\tAdding points to %0#{2*ADDR_LEN}x--%0#{2*ADDR_LEN}x" % [start[:addr], stop[:addr]] if verbose
+			p = Plot.new
+			
+			add_node_to_plot(node, p, start[:addr], line_from, addr_div, row_div)
+			
+			puts "\tTop line: #{line_from}" if verbose
+			puts "\tLines per pixel: #{row_div}"
+			puts "\tLeftmost address: #{"0x%x" % start[:addr]}" if verbose
+			puts "\tAddresses per pixel: #{addr_div}"
+			
+			puts "\tPlotting         %0#{2*ADDR_LEN}x--%0#{2*ADDR_LEN}x" % [start[:addr], stop[:addr]] if verbose
+			filename = "./#{VISUAL_DIR}/#{File.basename filename}__%0#{2*ADDR_LEN}x--%0#{2*ADDR_LEN}x__#{row_div}x#{addr_div}" % [start[:addr], stop[:addr]]
+			p.plot(filename)
+			filenames << filename
+		end
+		
+		return filenames
+		
+	rescue Errno::ENOENT
+		$stderr.puts "File '" + filename + "' does not exist!"
+	end
+end
