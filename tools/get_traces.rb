@@ -1,6 +1,6 @@
 def get_traces(settings)
-	FileUtils.rm_rf("#{TRACES_DIR}/#{settings[:name]}", secure: true)
-	FileUtils.mkdir("#{TRACES_DIR}/#{settings[:name]}")
+	FileUtils.rm_rf("#{GS[:traces_dir]}/#{settings[:name]}", secure: true)
+	FileUtils.mkdir("#{GS[:traces_dir]}/#{settings[:name]}")
 	
 	prng = Random.new
 	
@@ -18,10 +18,10 @@ def get_traces(settings)
 		
 		$stderr.puts("Consider
 		$ sudo su
-		$ echo 0 > /proc/sys/kernel/yama/ptrace_scope") or exit unless File.exists? TRACE_FILENAME[:bin]
+		$ echo 0 > /proc/sys/kernel/yama/ptrace_scope") or exit unless File.exists? GS[:trace_filename][:bin]
 		$stderr.puts("Incorrect output format, consider changing row_with_ciphertext parameter.") or exit unless !ct[/\H/] and ct.length == 32
 		
-		FileUtils.mv TRACE_FILENAME[:bin], "#{TRACES_DIR}/#{settings[:name]}/#{pt}_#{ct}"
+		FileUtils.mv GS[:trace_filename][:bin], "#{GS[:traces_dir]}/#{settings[:name]}/#{pt}_#{ct}"
 	end
 	puts
 	return pt

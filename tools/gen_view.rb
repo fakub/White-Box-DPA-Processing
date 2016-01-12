@@ -2,8 +2,10 @@ GRAPH_HEIGHT = 0x1000
 GRAPH_WIDTH = 0x400
 
 def add_node_to_plot(node, plot, addr_offset, row_offset, addr_div, row_div)
-	if node.has_key? :addr
-		plot.set((node[:row] - row_offset)/row_div, (node[:addr] - addr_offset)/addr_div, node[:length])
+	if node.has_key? :data
+		node[:data].each do |d|   # d ~ {row: row, addr: addr, length: words[2].hex, val: 1}
+			plot.set((d[:row] - row_offset)/row_div, (d[:addr] - addr_offset)/addr_div, d[:length])
+		end
 	else
 		node.each do |key, val|
 			add_node_to_plot(val, plot, addr_offset, row_offset, addr_div, row_div)
@@ -28,17 +30,19 @@ def gen_view(filename, addr_from, addr_to, line_from, line_to, split_files, row_
 			
 			node = h
 			
-			(2*ADDR_LEN-1).downto(0) do |i|
+			(2*GS[:addr_len]-1).downto(0) do |i|
 				k = ((addr >> (4*i)) & 0xf)
 				node[k] = {} unless node.has_key? k
 				node = node[k]
 			end
 			
-			node[:row] = row
-			node[:addr] = addr
-			node[:length] = words[2].hex
-			#~ node[:val] = words[3].hex
-			node[:val] = 1
+			node[:data] = [] if node[:data].nil?
+			node[:data] << {row: row, addr: addr, length: words[2].hex, val: 1}
+			
+			#~ node[:row] = row
+			#~ node[:addr] = addr
+			#~ node[:length] = words[2].hex
+			#~ # node[:val] = words[3].hex
 			node[:dumb0] = nil; node[:dumb1] = nil; node[:dumb2] = nil; node[:dumb3] = nil; node[:dumb4] = nil; node[:dumb5] = nil; node[:dumb6] = nil; node[:dumb7] = nil; node[:dumb8] = nil; node[:dumb9] = nil; node[:dumba] = nil; node[:dumbb] = nil; node[:dumbc] = nil; node[:dumbd] = nil; node[:dumbe] = nil; node[:dumbf] = nil;
 			
 			break if row > line_to
@@ -52,7 +56,7 @@ def gen_view(filename, addr_from, addr_to, line_from, line_to, split_files, row_
 		begin
 			# find a node with minimum subnodes
 			minimal = nodes.min_by{|node|node.length}
-			break if minimal.has_key?(:addr) or (nodes.length + minimal.length - 2 > split_files)
+			break if minimal.has_key?(:data) or (nodes.length + minimal.length - 2 > split_files)
 			# replace it with these nodes
 			nodes.delete_if{|node|node == minimal}
 			minimal.each do |key, value|
@@ -68,7 +72,7 @@ def gen_view(filename, addr_from, addr_to, line_from, line_to, split_files, row_
 				end
 			end while change
 			# move singletons
-			nodes.select{|no|no.has_key? :addr}.each do |singleton|
+			nodes.select{|no|no.has_key? :data}.each do |singleton|
 				nodes.delete_if{|node|node == singleton}
 				singletons << singleton
 			end
@@ -80,24 +84,26 @@ def gen_view(filename, addr_from, addr_to, line_from, line_to, split_files, row_
 			puts "\t----------------\n\tStarting new node" if verbose
 			start = node
 			stop  = node
-			while not start.has_key? :addr
+			while not start.has_key? :data
 				start = start[start.keys.sort.first]
 			end
-			while not stop.has_key? :addr
+			while not stop.has_key? :data
 				stop = stop[stop.keys.sort.last]
 			end
+			start_addr = start[:data].first[:addr]
+			stop_addr = stop[:data].first[:addr]
 			
-			addr_div = addr_div_arg.nil? ? ((stop[:addr] - start[:addr])/GRAPH_WIDTH + 1) : addr_div_arg.hex
+			addr_div = addr_div_arg.nil? ? ((stop_addr - start_addr)/GRAPH_WIDTH + 1) : addr_div_arg.hex
 			
-			puts "\tAdding points to %0#{2*ADDR_LEN}x--%0#{2*ADDR_LEN}x" % [start[:addr], stop[:addr]] if verbose
+			puts "\tAdding points to %0#{2*GS[:addr_len]}x--%0#{2*GS[:addr_len]}x" % [start_addr, stop_addr] if verbose
 			p = Plot.new
 			
-			add_node_to_plot(node, p, start[:addr], line_from, addr_div, row_div)
+			add_node_to_plot(node, p, start_addr, line_from, addr_div, row_div)
 			
-			puts "\tTop line: #{line_from}\n\tLines per pixel: #{row_div}\n\tLeftmost address: #{"0x%x" % start[:addr]}\n\tAddresses per pixel: #{addr_div}" if verbose
+			puts "\tTop line: #{line_from}\n\tLines per pixel: #{row_div}\n\tLeftmost address: #{"0x%x" % start_addr}\n\tAddresses per pixel: #{addr_div}" if verbose
 			
-			puts "\tPlotting         %0#{2*ADDR_LEN}x--%0#{2*ADDR_LEN}x" % [start[:addr], stop[:addr]] if verbose
-			filename = "./#{VISUAL_DIR}/#{File.basename filename}__%0#{2*ADDR_LEN}x--%0#{2*ADDR_LEN}x__#{row_div}x#{addr_div}" % [start[:addr], stop[:addr]]
+			puts "\tPlotting         %0#{2*GS[:addr_len]}x--%0#{2*GS[:addr_len]}x" % [start_addr, stop_addr] if verbose
+			filename = "./#{File.dirname filename}/#{File.basename filename}__%0#{2*GS[:addr_len]}x--%0#{2*GS[:addr_len]}x__#{row_div}x#{addr_div}.png" % [start_addr, stop_addr]
 			p.plot(filename)
 			filenames << filename
 		end

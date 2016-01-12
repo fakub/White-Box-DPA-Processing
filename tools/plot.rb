@@ -51,8 +51,8 @@ class Plot
 			end
 		end
 		
-		puts "\t\tWriting result ... " + filename + ".png" if verbose
-		img.write("png:" + filename + ".png")
+		puts "\t\tWriting result ... " + filename if verbose
+		img.write("png:" + filename)
 		
 	end
 	
