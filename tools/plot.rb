@@ -23,15 +23,15 @@ class Plot
 		@lines.max_by{|line|line.nil? ? 0 : line.map(&:to_i).max}.map(&:to_i).max
 	end
 	
-	def plot(filename, margin = 0)
+	def plot(filename, margin = 0, verbose = false)
 		
-		print "\t\tWidth ... "
+		print "\t\tWidth ... " if verbose
 		w = width
-		puts w
+		puts w if verbose
 		
-		print "\t\tHeight ... "
+		print "\t\tHeight ... " if verbose
 		h = height
-		puts h
+		puts h if verbose
 		
 		m = max
 		
@@ -51,7 +51,7 @@ class Plot
 			end
 		end
 		
-		puts "\t\tWriting result ... " + filename + ".png"
+		puts "\t\tWriting result ... " + filename + ".png" if verbose
 		img.write("png:" + filename + ".png")
 		
 	end

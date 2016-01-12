@@ -94,10 +94,7 @@ def gen_view(filename, addr_from, addr_to, line_from, line_to, split_files, row_
 			
 			add_node_to_plot(node, p, start[:addr], line_from, addr_div, row_div)
 			
-			puts "\tTop line: #{line_from}" if verbose
-			puts "\tLines per pixel: #{row_div}"
-			puts "\tLeftmost address: #{"0x%x" % start[:addr]}" if verbose
-			puts "\tAddresses per pixel: #{addr_div}"
+			puts "\tTop line: #{line_from}\n\tLines per pixel: #{row_div}\n\tLeftmost address: #{"0x%x" % start[:addr]}\n\tAddresses per pixel: #{addr_div}" if verbose
 			
 			puts "\tPlotting         %0#{2*ADDR_LEN}x--%0#{2*ADDR_LEN}x" % [start[:addr], stop[:addr]] if verbose
 			filename = "./#{VISUAL_DIR}/#{File.basename filename}__%0#{2*ADDR_LEN}x--%0#{2*ADDR_LEN}x__#{row_div}x#{addr_div}" % [start[:addr], stop[:addr]]

@@ -12,8 +12,10 @@ def trace_preview(settings, sample_pt, alt)
 	line_from = 0
 	line_to = Float::INFINITY
 	
-	split_files = 1
+	#~ split_files = 1
 	
-	gen_view("#{VISUAL_DIR}/#{settings[:name]}_#{sample_pt}.flt", addr_from, addr_to, line_from, line_to, split_files, nil, nil)
-	gen_view("#{VISUAL_DIR}/#{settings[:name]}_#{sample_pt}.orig", addr_from, addr_to, line_from, line_to, split_files, nil, nil)
+	ff = gen_view("#{VISUAL_DIR}/#{settings[:name]}_#{sample_pt}.flt", addr_from, addr_to, line_from, line_to, 1, nil, nil)
+	fo = gen_view("#{VISUAL_DIR}/#{settings[:name]}_#{sample_pt}.orig", addr_from, addr_to, line_from, line_to, 1, nil, nil)
+	
+	return [ff.first, fo.first]
 end
