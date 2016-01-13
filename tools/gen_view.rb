@@ -16,7 +16,6 @@ end
 def gen_view(filename, addr_from, addr_to, line_from, line_to, split_files, row_div_arg, addr_div_arg, verbose = false)
 	begin
 		h = {}
-		p = Plot.new
 		row = -1
 		
 		puts "\n\tFilling hash tree ..." if verbose   # fill hash tree

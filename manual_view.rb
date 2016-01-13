@@ -63,6 +63,6 @@ puts "Final settings:
 	Address div: #{addr_div_arg}
 
 If you are sure where encryption takes place, filter address & row range by
-	$ ./addr_row_filter.rb #{settings[:name]}
+	$ ./#{MANFLT_FILE} #{settings[:name]}
 Otherwise you need to attack first 1-3 bytes and find the place of encryption, run
-	$ ./???"
+	$ ./#{MARKENCR_FILE} #{settings[:name]} n_traces bytes=3"

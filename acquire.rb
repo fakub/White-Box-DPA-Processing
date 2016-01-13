@@ -52,8 +52,8 @@ tp = trace_preview(settings, sample_pt, alt)
 puts "Have a look at
 	#{tp}.
 If you are sure where encryption takes place, filter address & row range by
-	$ ./addr_row_filter.rb #{settings[:name]}
+	$ ./#{MANFLT_FILE} #{settings[:name]}
 If you want to split or zoom the memtrace figure, run
-	$ ./manual_view.rb #{settings[:name]}
+	$ ./#{MANVIEW_FILE} #{settings[:name]}
 Otherwise you need to attack first 1-3 bytes and find the place of encryption, run
-	$ ./???"
+	$ ./#{MARKENCR_FILE} #{settings[:name]} n_traces bytes=3"

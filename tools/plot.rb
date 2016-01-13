@@ -3,7 +3,7 @@ include Magick
 
 class Plot
 	def initialize
-		@lines = [[0]]
+		@lines = []
 	end
 	
 	def set(x, y, val)
@@ -53,8 +53,8 @@ class Plot
 		@lines.each_with_index do |line,ri|
 			unless line.nil?
 				line.each_with_index do |e,ci|
-					#~ img.pixel_color(ci+margin,ri+margin,"hsl(#{e.to_f/m*240},100,50)") unless e.nil?
-					img.pixel_color(ci+margin,ri+margin,"hsl(#{e.to_f/m*240},100,50)") unless e.nil?
+					#~ img.pixel_color(ci+margin,ri+margin,"hsl(#{e.to_f/m*240},255,50)") unless e.nil?
+					img.pixel_color(ci+margin,ri+margin,"hsl(#{e.to_f/m*360},255,100)") unless e.nil?
 				end
 			end
 		end
