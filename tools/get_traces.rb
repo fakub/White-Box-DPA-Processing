@@ -8,7 +8,7 @@ def get_traces(settings)
 	puts "_" * settings[:ndots]
 	doti = 0
 	
-	pt = nil   # s.t. it persists outside the block
+	#~ pt = nil   # s.t. it persists outside the block
 	
 	settings[:n_traces].times do |i|
 		if i*settings[:ndots] >= settings[:n_traces]*doti; doti += 1; print "."; end   # progress bar
@@ -24,5 +24,6 @@ def get_traces(settings)
 		FileUtils.mv GS[:trace_filename][:bin], "#{GS[:traces_dir]}/#{settings[:name]}/#{pt}_#{ct}"
 	end
 	puts
+	
 	return pt
 end

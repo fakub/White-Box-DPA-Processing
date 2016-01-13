@@ -10,12 +10,16 @@
 :acq_ra:
   :bin: "pin -t /path/to/pin-install-dir/source/tools/MemoryTracer/obj-intel64/read_addr_bin.so --"
   :txt: "pin -t /path/to/pin-install-dir/source/tools/MemoryTracer/obj-intel64/read_addr_txt.so --"
+  :type: :ra
 :acq_rc:
   :bin: "pin -t /path/to/pin-install-dir/source/tools/MemoryTracer/obj-intel64/read_cnt_bin.so --"
   :txt: "pin -t /path/to/pin-install-dir/source/tools/MemoryTracer/obj-intel64/read_cnt_txt.so --"
+  :type: :rc
 :acq_wa:
   :bin: "pin -t /path/to/pin-install-dir/source/tools/MemoryTracer/obj-intel64/write_addr_bin.so --"
   :txt: "pin -t /path/to/pin-install-dir/source/tools/MemoryTracer/obj-intel64/write_addr_txt.so --"
+  :type: :wa
 :acq_wc:
   :bin: "pin -t /path/to/pin-install-dir/source/tools/MemoryTracer/obj-intel64/write_cnt_bin.so --"
   :txt: "pin -t /path/to/pin-install-dir/source/tools/MemoryTracer/obj-intel64/write_cnt_txt.so --"
+  :type: :wc

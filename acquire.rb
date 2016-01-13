@@ -33,7 +33,7 @@ else
 end
 settings[:cmd] = ARGV[1]
 settings[:ct_row] = ARGV[2].to_i
-settings[:name] = ARGV[3]
+settings[:name] = ARGV[3] + "__#{settings[:acq][:type]}"
 settings[:n_traces] = ARGV[4].nil? ? 10 : ARGV[4].to_i
 settings[:ndots] = settings[:n_traces] < GS[:ndots_default] ? settings[:n_traces] : GS[:ndots_default]
 
@@ -47,7 +47,13 @@ filter(Dir["#{GS[:traces_dir]}/#{settings[:name]}/*"], alt, :bin, true)
 alt_to_file(alt, "#{GS[:traces_dir]}/#{settings[:name]}.alt")
 
 # acquire sample pt again to text & create preview
-trace_preview(settings, sample_pt, alt)
+tp = trace_preview(settings, sample_pt, alt)
 
-puts "\nContinue with
-	$ ./addr_filter.rb #{settings[:name]}"
+puts "Have a look at
+	#{tp}.
+If you are sure where encryption takes place, filter address & row range by
+	$ ./addr_row_filter.rb #{settings[:name]}
+If you want to split or zoom the memtrace figure, run
+	$ ./manual_view.rb #{settings[:name]}
+Otherwise you need to attack first 1-3 bytes and find the place of encryption, run
+	$ ./???"

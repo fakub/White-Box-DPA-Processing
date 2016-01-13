@@ -43,7 +43,7 @@ def gen_view(filename, addr_from, addr_to, line_from, line_to, split_files, row_
 			#~ node[:addr] = addr
 			#~ node[:length] = words[2].hex
 			#~ # node[:val] = words[3].hex
-			node[:dumb0] = nil; node[:dumb1] = nil; node[:dumb2] = nil; node[:dumb3] = nil; node[:dumb4] = nil; node[:dumb5] = nil; node[:dumb6] = nil; node[:dumb7] = nil; node[:dumb8] = nil; node[:dumb9] = nil; node[:dumba] = nil; node[:dumbb] = nil; node[:dumbc] = nil; node[:dumbd] = nil; node[:dumbe] = nil; node[:dumbf] = nil;
+			node[:dumb0] = 0; node[:dumb1] = 0; node[:dumb2] = 0; node[:dumb3] = 0; node[:dumb4] = 0; node[:dumb5] = 0; node[:dumb6] = 0; node[:dumb7] = 0; node[:dumb8] = 0; node[:dumb9] = 0; node[:dumba] = 0; node[:dumbb] = 0; node[:dumbc] = 0; node[:dumbd] = 0; node[:dumbe] = 0; node[:dumbf] = 0;
 			
 			break if row > line_to
 		end
@@ -103,9 +103,9 @@ def gen_view(filename, addr_from, addr_to, line_from, line_to, split_files, row_
 			puts "\tTop line: #{line_from}\n\tLines per pixel: #{row_div}\n\tLeftmost address: #{"0x%x" % start_addr}\n\tAddresses per pixel: #{addr_div}" if verbose
 			
 			puts "\tPlotting         %0#{2*GS[:addr_len]}x--%0#{2*GS[:addr_len]}x" % [start_addr, stop_addr] if verbose
-			filename = "./#{File.dirname filename}/#{File.basename filename}__%0#{2*GS[:addr_len]}x--%0#{2*GS[:addr_len]}x__#{row_div}x#{addr_div}.png" % [start_addr, stop_addr]
-			p.plot(filename)
-			filenames << filename
+			outfile = "#{filename}__%0#{2*GS[:addr_len]}x--%0#{2*GS[:addr_len]}x__#{row_div}x#{addr_div}.png" % [start_addr, stop_addr]
+			p.plot(outfile)
+			filenames << outfile
 		end
 		
 		return filenames

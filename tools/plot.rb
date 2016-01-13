@@ -7,8 +7,16 @@ class Plot
 	end
 	
 	def set(x, y, val)
+		return if x < 0 or y < 0
 		@lines[x] = [] if @lines[x].nil?
 		@lines[x][y] = val.to_i
+	end
+	
+	def emph(x, y, val)
+		(x-4).upto(x+4){|i|set(i,y-4,val); set(i,y+4,val)}
+		(x-3).upto(x+3){|i|set(i,y-3,val); set(i,y+3,val)}
+		(y-4).upto(y+4){|j|set(x-4,j,val); set(x+4,j,val)}
+		(y-3).upto(y+3){|j|set(x-3,j,val); set(x+3,j,val)}
 	end
 	
 	def width
@@ -45,8 +53,8 @@ class Plot
 		@lines.each_with_index do |line,ri|
 			unless line.nil?
 				line.each_with_index do |e,ci|
-					#~ img.pixel_color(ci+margin,ri+margin,"hsl(#{e.to_f/m*360},100,100)") unless e.nil?
-					img.pixel_color(ci+margin,ri+margin,"hsl(#{e.to_f/m*360},100,0)") unless e.nil?
+					#~ img.pixel_color(ci+margin,ri+margin,"hsl(#{e.to_f/m*240},100,50)") unless e.nil?
+					img.pixel_color(ci+margin,ri+margin,"hsl(#{e.to_f/m*240},100,50)") unless e.nil?
 				end
 			end
 		end
