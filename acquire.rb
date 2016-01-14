@@ -6,10 +6,10 @@ require "./tools/all.rb"
 $stderr.puts("Usage:
 	$ #{File.basename(__FILE__)} ra/rc/wa/wc \"AES command\" row_with_ciphertext name (n_traces = 32)
 		where
-			ra ... Read Address,
-			rc ... Read Content, not implemented yet,
-			wa ... Write Address, not implemented yet,
-			wc ... Write Content ") or exit if ARGV[2].nil?
+			ra ... Read  Address#{GS.has_key?(:acq_ra) ? "" : ", not implemented yet"},
+			rc ... Read  Content#{GS.has_key?(:acq_rc) ? "" : ", not implemented yet"},
+			wa ... Write Address#{GS.has_key?(:acq_wa) ? "" : ", not implemented yet"},
+			wc ... Write Content#{GS.has_key?(:acq_wc) ? "" : ", not implemented yet"}.") or exit if ARGV[2].nil?
 
 # check ASLR OFF
 $stderr.print("Is ASLR really OFF? (Y/n) ")
@@ -33,27 +33,30 @@ else
 end
 settings[:cmd] = ARGV[1]
 settings[:ct_row] = ARGV[2].to_i
-settings[:name] = ARGV[3] + "__#{settings[:acq][:type]}"
+settings[:name] = ARGV[3]
 settings[:n_traces] = ARGV[4].nil? ? 10 : ARGV[4].to_i
 settings[:ndots] = settings[:n_traces] < GS[:ndots_default] ? settings[:n_traces] : GS[:ndots_default]
 
 
 # acquire & save traces
-sample_pt = get_traces(settings)
+sample_pt, merge = get_traces(settings)
 
 # create & use & save mask of alternating bytes of traces (non-constant ones)
 alt = alt_mask(settings)
 filter(Dir["#{GS[:traces_dir]}/#{settings[:name]}/*"], alt, :bin, true)
 alt_to_file(alt, "#{GS[:traces_dir]}/#{settings[:name]}.alt")
 
+# merge traces if told to
+merge_traces(settings) if merge
+
 # acquire sample pt again to text & create preview
 tp = trace_preview(settings, sample_pt, alt)
 
-puts "Have a look at
+puts "Have a look at trace previews in
 	#{tp}.
 If you are sure where encryption takes place, filter address & row range by
 	$ ./#{MANFLT_FILE} #{settings[:name]}
 If you want to split or zoom the memtrace figure, run
 	$ ./#{MANVIEW_FILE} #{settings[:name]}
-Otherwise you need to attack first 1-3 bytes and find the place of encryption, run
+Otherwise you can attack first few bytes and find the place of encryption, run
 	$ ./#{MARKENCR_FILE} #{settings[:name]} n_traces bytes=3"

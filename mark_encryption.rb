@@ -19,16 +19,21 @@ cas = {
 	"targetbits" => [0, 1, 2, 3, 4, 5, 6, 7]
 }
 
-#~ cas_filename = "../cpp_attack/#{settings[:name]}.yaml"
-#~ File.write(cas_filename, YAML.dump(cas))
+cas_filename = "../cpp_attack/#{settings[:name]}.yaml"
+File.write(cas_filename, YAML.dump(cas))
 
-#~ log = Open3.capture2("../cpp_attack/attack #{cas_filename}")[0]
+puts "Running attack ..."
+puts log = Open3.capture2("../cpp_attack/attack #{cas_filename}")[0]
+FileUtils.rm cas_filename
 
-#!# change cpp_attack's output log to find it easier -> argmax
+log = log.split(/Attacking[\W]+?[\d]+?\.\Wbyte\W\.\.\./)
+log.slice!(0)
 
+argmax = []
 
-
-argmax = [640, 648, 656]
+log.each do |lb|
+	argmax << lb.split("New local max: ").last.split(/\n/)[2].split("|")[3].to_i
+end
 
 txt_file = Dir["#{GS[:visual_dir]}/#{settings[:name]}/*.flt"].select{|f|f =~ /[0-9a-fA-F]{32}\.flt/}.first
 png_file = Dir["#{GS[:visual_dir]}/#{settings[:name]}/*"].select{|f|f =~ /[0-9a-fA-F]{32}\.flt__[0-9a-fA-F]{12}\-\-[0-9a-fA-F]{12}__[0-9]+?x[0-9]+?\.png/}.first
@@ -50,3 +55,9 @@ argmax.each do |row|
 end
 
 p.plot("#{GS[:visual_dir]}/#{settings[:name]}/emph.png")
+
+puts "Check previous log to see how strong these candidates are. If OK, see \"#{GS[:visual_dir]}/#{settings[:name]}/emph.png\" -- this is where encryption probably takes place. Filter address & row range by
+	$ ./#{MANFLT_FILE} #{settings[:name]}
+Otherwise run attack without range filtering but keep in mind that it will be much slower, run
+	$ cd ../cpp_attack
+	$ ./attack copy_template_and_fill_own_settings.yaml"

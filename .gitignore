@@ -3,3 +3,4 @@ visual
 find_leakage
 old
 *.yaml
+*.log

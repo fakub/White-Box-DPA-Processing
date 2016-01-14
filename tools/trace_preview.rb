@@ -1,8 +1,6 @@
 def trace_preview(settings, sample_pt, alt)
 	FileUtils.rm_rf("#{GS[:visual_dir]}/#{settings[:name]}", secure: true)
-	FileUtils.mkdir("#{GS[:visual_dir]}/#{settings[:name]}")
-	
-	puts "\nCreating trace previews ..."
+	FileUtils.mkpath("#{GS[:visual_dir]}/#{settings[:name]}")
 	
 	Open3.capture2([settings[:acq][:txt], settings[:cmd], sample_pt].join(" "))
 	filter([GS[:trace_filename][:txt]], alt, :txt)

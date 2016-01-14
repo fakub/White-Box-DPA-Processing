@@ -8,50 +8,62 @@ $stderr.puts("Usage:
 # read arguments & set parameters
 settings = {}
 settings[:name] = ARGV[0]
+$stderr.puts("Name \"#{settings[:name]}\" does not exist. Check \"./#{GS[:visual_dir]}\" directory.") or exit unless Dir.exists?("#{GS[:visual_dir]}/#{settings[:name]}")
 
-filename = Dir["#{GS[:visual_dir]}/#{settings[:name]}/*.flt"].first
-FileUtils.rm_rf("#{GS[:visual_dir]}/#{settings[:name]}/playground", secure: true)
-FileUtils.mkdir("#{GS[:visual_dir]}/#{settings[:name]}/playground")
-last_views = []
+fltfile = Dir["#{GS[:visual_dir]}/#{settings[:name]}/*.flt"].first   #!# check
+$stderr.puts("Fatal: no *.flt file found! (in \"#{GS[:visual_dir]}/#{settings[:name]}\")") or exit if fltfile.nil?
+FileUtils.rm_rf("#{GS[:visual_dir]}/#{settings[:name]}/#{GS[:man_view_dir]}", secure: true)
+FileUtils.mkpath("#{GS[:visual_dir]}/#{settings[:name]}/#{GS[:man_view_dir]}")
+FileUtils.cp(fltfile, "#{GS[:visual_dir]}/#{settings[:name]}/#{GS[:man_view_dir]}/")
+fltfile = File.basename fltfile
 
-begin
-	FileUtils.rm last_views
+addr_from = nil
+addr_to = nil
+line_from = nil
+line_to = nil
+split_files = nil
+row_div_arg = nil
+addr_div_arg = nil
+
+Dir.chdir("#{GS[:visual_dir]}/#{settings[:name]}/#{GS[:man_view_dir]}") do
 	last_views = []
 	
-	begin
-		print "Address from (hex): "
-		addr_from = $stdin.gets.hex.abs
-		print "Address to (hex):   "
-		addr_to = $stdin.gets.hex
-		addr_to = (addr_to <= 0) ? 0xffffffffffff : addr_to
-	end until addr_from < addr_to or $stderr.puts("Address from must be smaller than Address to. Use 0 instead of 0xffffffffffff.")
-	begin
-		print "Line from (dec): "
-		line_from = $stdin.gets.to_i.abs
-		print "Line to (dec):   "
-		line_to = $stdin.gets.to_i
-		line_to = (line_to <= 0) ? Float::INFINITY : line_to
-	end until line_from < line_to or $stderr.puts("Line from must be smaller than Line to. Use 0 instead of INFINITY.")
-	print "Split files: "
-	split_files = $stdin.gets.to_i
-	split_files = (split_files <= 0) ? 1 : split_files
-	print "Row div (optional, dec): "
-	row_div_arg = $stdin.gets.to_i.abs
-	row_div_arg = row_div_arg == 0 ? nil : row_div_arg
-	print "Address div (optional, dec): "
-	addr_div_arg = $stdin.gets.to_i.abs
-	addr_div_arg = addr_div_arg == 0 ? nil : addr_div_arg
+	puts "All values can be set to default by simply hitting Enter."
 	
-	#!# may rewrite original trace preview !!!
-	lv = gen_view(filename, addr_from, addr_to, line_from, line_to, split_files, row_div_arg, addr_div_arg)
-	lv.each do |file|
-		FileUtils.mv(file, "#{GS[:visual_dir]}/#{settings[:name]}/playground/" + File.basename(file))
-		last_views << "#{GS[:visual_dir]}/#{settings[:name]}/playground/" + File.basename(file)
-	end
-	
-	puts "\nCheck files in #{GS[:visual_dir]}/#{settings[:name]}/playground/."
-	print "Enough? (Y/n) "
-end until $stdin.gets.chomp == "Y"
+	begin
+		FileUtils.rm last_views
+		last_views = []
+		
+		begin
+			print "Address from (hex): "
+			addr_from = $stdin.gets.hex.abs
+			print "Address to (hex):   "
+			addr_to = $stdin.gets.hex
+			addr_to = (addr_to <= 0) ? 0xffffffffffff : addr_to
+		end until addr_from < addr_to or $stderr.puts("Address from must be smaller than Address to. Use 0 instead of 0xffffffffffff.")
+		begin
+			print "Line from (dec): "
+			line_from = $stdin.gets.to_i.abs
+			print "Line to (dec):   "
+			line_to = $stdin.gets.to_i
+			line_to = (line_to <= 0) ? Float::INFINITY : line_to
+		end until line_from < line_to or $stderr.puts("Line from must be smaller than Line to. Use 0 instead of INFINITY.")
+		print "Split files: "
+		split_files = $stdin.gets.to_i
+		split_files = (split_files <= 0) ? 1 : split_files
+		print "Row div (dangerous, dec): "
+		row_div_arg = $stdin.gets.to_i.abs
+		row_div_arg = row_div_arg == 0 ? nil : row_div_arg
+		print "Address div (dangerous, dec): "
+		addr_div_arg = $stdin.gets.to_i.abs
+		addr_div_arg = addr_div_arg == 0 ? nil : addr_div_arg
+		
+		last_views << gen_view(fltfile, addr_from, addr_to, line_from, line_to, split_files, row_div_arg, addr_div_arg)
+		
+		puts "\nCheck files in \"#{GS[:visual_dir]}/#{settings[:name]}/#{GS[:man_view_dir]}\"."
+		print "Enough? (Y/n) "
+	end until $stdin.gets.chomp == "Y"
+end
 
 puts "Final settings:
 	Address from: 0x#{addr_from.to_s 16}
@@ -64,5 +76,5 @@ puts "Final settings:
 
 If you are sure where encryption takes place, filter address & row range by
 	$ ./#{MANFLT_FILE} #{settings[:name]}
-Otherwise you need to attack first 1-3 bytes and find the place of encryption, run
+Otherwise you can attack first few bytes and find the place of encryption, run
 	$ ./#{MARKENCR_FILE} #{settings[:name]} n_traces bytes=3"
