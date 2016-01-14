@@ -5,6 +5,7 @@
   :bin: "trace"
   :txt: "MemoryTracer.out"
 :traces_dir: "traces"
+:settings_dir: "settings"
 :visual_dir: "visual"
 :man_view_dir: "man_view"
 :arf_dir: "ar_filter"

@@ -2,13 +2,12 @@
 
 require "./tools/all.rb"
 
+# print help
 $stderr.puts("Usage:
 	$ #{File.basename(__FILE__)} name") or exit if ARGV[0].nil?
 
-# read arguments & set parameters
-settings = {}
-settings[:name] = ARGV[0]
-$stderr.puts("Name \"#{settings[:name]}\" does not exist. Check \"./#{GS[:visual_dir]}\" directory.") or exit unless Dir.exists?("#{GS[:visual_dir]}/#{settings[:name]}")
+settings = load_settings(ARGV[0])
+
 
 fltfile = Dir["#{GS[:visual_dir]}/#{settings[:name]}/*.flt"].first   #!# check
 $stderr.puts("Fatal: no *.flt file found! (in \"#{GS[:visual_dir]}/#{settings[:name]}\")") or exit if fltfile.nil?
@@ -65,7 +64,7 @@ Dir.chdir("#{GS[:visual_dir]}/#{settings[:name]}/#{GS[:man_view_dir]}") do
 	end until $stdin.gets.chomp == "Y"
 end
 
-puts "Final settings:
+puts "\nFinal settings:
 	Address from: 0x#{addr_from.to_s 16}
 	Address to: 0x#{addr_to.to_s 16}
 	Line from: #{line_from}

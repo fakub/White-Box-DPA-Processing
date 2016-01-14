@@ -6,12 +6,8 @@ require "./tools/all.rb"
 $stderr.puts("Usage:
 	$ #{File.basename(__FILE__)} name") or exit if ARGV[0].nil?
 
-# read arguments & set parameters
-settings = {}
-settings[:name] = ARGV[0]
-$stderr.puts("Name \"#{settings[:name]}\" does not exist. Check \"./#{GS[:traces_dir]}\" directory.") or exit unless Dir.exists?("#{GS[:traces_dir]}/#{settings[:name]}")
-settings[:n_traces] = Dir["#{GS[:traces_dir]}/#{settings[:name]}/*"].size
-settings[:ndots] = settings[:n_traces] < GS[:ndots_default] ? settings[:n_traces] : GS[:ndots_default]
+settings = load_settings(ARGV[0])
+
 
 fltfile = Dir["#{GS[:visual_dir]}/#{settings[:name]}/*.flt"].select{|f|f =~ /[0-9a-fA-F]{32}\.flt/}.first
 $stderr.puts("Fatal: no *.flt file found! (in \"#{GS[:visual_dir]}/#{settings[:name]}\")") or exit if fltfile.nil?
@@ -83,6 +79,6 @@ FileUtils.cp(Dir["#{GS[:traces_dir]}/#{settings[:name]}/*"], target_dir)
 # use altfilename
 filter(Dir["#{target_dir}/*"], alt_from_file("#{GS[:visual_dir]}/#{settings[:name]}/#{GS[:arf_dir]}/#{altfilename}"), :bin)
 
-puts "You can find filtered traces in \"#{target_dir}\". Now run attack
+puts "\nYou can find filtered traces in \"#{target_dir}\". Now run attack
 	$ cd ../cpp_attack
 	$ ./attack copy_template_and_fill_own_settings.yaml"

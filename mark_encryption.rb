@@ -6,16 +6,16 @@ require "./tools/all.rb"
 $stderr.puts("Usage:
 	$ #{File.basename(__FILE__)} name n_traces bytes=3") or exit if ARGV[1].nil?
 
-# read arguments & set parameters
-settings = {}
-settings[:name] = ARGV[0]
-settings[:n_traces] = ARGV[1].to_i.abs
-settings[:bytes] = ARGV[2].nil? ? 3 : ((1..16).include?(ARGV[2].to_i) ? ARGV[2].to_i : 3)   #!# 3 -> glob settings
+settings = load_settings(ARGV[0])
+
+
+try_n_traces = ARGV[1].to_i.abs
+try_attack_bytes = ARGV[2].nil? ? 3 : ((1..16).include?(ARGV[2].to_i) ? ARGV[2].to_i : 3)   #!# 3 -> glob settings
 
 cas = {
 	"dirname" => "../attack/#{GS[:traces_dir]}/#{settings[:name]}",
-	"n_traces" => settings[:n_traces],
-	"attack_bytes" => settings[:bytes],
+	"n_traces" => try_n_traces,
+	"attack_bytes" => try_attack_bytes,
 	"targetbits" => [0, 1, 2, 3, 4, 5, 6, 7]
 }
 
@@ -42,19 +42,21 @@ addr_beg = png_file.match(/__[0-9a-fA-F]{12}\-\-[0-9a-fA-F]{12}__[0-9]+?x[0-9]+?
 addr_div = png_file.match(/__[0-9]+?x[0-9]+?\.png/).to_s.split("x")[1].split(".")[0].to_i
 row_div = png_file.match(/__[0-9]+?x[0-9]+?\.png/).to_s.split("x")[0][2..-1].to_i
 
+addrs = []
 p = Plot.new
 
 argmax.each do |row|
 	row /= 8   # actual row in text trace
-	addr = IO.readlines(txt_file)[row].split[1].hex
+	addrs << IO.readlines(txt_file)[row].split[1].hex
 	
-	apixel = (addr - addr_beg) / addr_div
+	apixel = (addrs.last - addr_beg) / addr_div
 	rpixel = row / row_div
 	
 	p.emph(rpixel, apixel, 1)
 end
 
 p.plot("#{GS[:visual_dir]}/#{settings[:name]}/emph.png")
+puts "Leaking at #{addrs.map{|a|"0x"+a.to_s(16)}.join(", ")}."
 
 puts "Check previous log to see how strong these candidates are. If OK, see \"#{GS[:visual_dir]}/#{settings[:name]}/emph.png\" -- this is where encryption probably takes place. Filter address & row range by
 	$ ./#{MANFLT_FILE} #{settings[:name]}

@@ -52,7 +52,10 @@ merge_traces(settings) if merge
 # acquire sample pt again to text & create preview
 tp = trace_preview(settings, sample_pt, alt)
 
-puts "Have a look at trace previews in
+# save settings
+save_settings(settings, merge)
+
+puts "\nHave a look at trace preview in
 	#{tp}.
 If you are sure where encryption takes place, filter address & row range by
 	$ ./#{MANFLT_FILE} #{settings[:name]}
