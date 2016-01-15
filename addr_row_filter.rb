@@ -71,14 +71,19 @@ Start filtering with this range? (Y/n) "
 end
 
 # copy binary traces
-target_dir = "#{GS[:traces_dir]}/#{settings[:name]}__#{px_in_name}"
+target_name = "#{settings[:name]}__#{px_in_name}"
+target_dir = "#{GS[:traces_dir]}/#{target_name}"
 FileUtils.rm_rf(target_dir, secure: true)
 FileUtils.mkpath(target_dir)
 FileUtils.cp(Dir["#{GS[:traces_dir]}/#{settings[:name]}/*"], target_dir)
 
-# use altfilename
-filter(Dir["#{target_dir}/*"], alt_from_file("#{GS[:visual_dir]}/#{settings[:name]}/#{GS[:arf_dir]}/#{altfilename}"), :bin)
+settings[:name] = target_name
+FileUtils.cp("#{GS[:visual_dir]}/#{settings[:name]}/#{GS[:arf_dir]}/#{altfilename}", "#{GS[:traces_dir]}/#{settings[:name]}.alt")
 
-puts "\nYou can find filtered traces in \"#{target_dir}\". Now run attack
-	$ cd ../cpp_attack
-	$ ./attack copy_template_and_fill_own_settings.yaml"
+# use altfilename
+filter(Dir["#{target_dir}/*"], alt_from_file("#{GS[:traces_dir]}/#{settings[:name]}.alt"), :bin)
+save_settings(settings)
+
+puts "
+You can find filtered traces in \"#{target_dir}\". Now run attack
+	$ ./#{ATTACK_FILE} #{target_name} (n_traces=-1 bytes=16)"

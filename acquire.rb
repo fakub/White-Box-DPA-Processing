@@ -55,11 +55,12 @@ tp = trace_preview(settings, sample_pt, alt)
 # save settings
 save_settings(settings, merge)
 
-puts "\nHave a look at trace preview in
-	#{tp}.
+puts "
+Have a look at trace preview in
+	\"#{tp}\".
 If you are sure where encryption takes place, filter address & row range by
 	$ ./#{MANFLT_FILE} #{settings[:name]}
 If you want to split or zoom the memtrace figure, run
 	$ ./#{MANVIEW_FILE} #{settings[:name]}
-Otherwise you can attack first few bytes and find the place of encryption, run
-	$ ./#{MARKENCR_FILE} #{settings[:name]} n_traces bytes=3"
+If you are not sure you can attack first 1..3 bytes and find the place of encryption, run
+	$ ./#{ATTACK_FILE} #{settings[:name]} (n_traces=-1 bytes=16)"

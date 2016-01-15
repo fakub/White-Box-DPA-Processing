@@ -4,27 +4,27 @@ require "./tools/all.rb"
 
 # print help
 $stderr.puts("Usage:
-	$ #{File.basename(__FILE__)} name n_traces bytes=3") or exit if ARGV[1].nil?
+	$ #{File.basename(__FILE__)} name (n_traces=-1 bytes=16)") or exit if ARGV[0].nil?
 
 settings = load_settings(ARGV[0])
 
 
-try_n_traces = ARGV[1].to_i.abs
-try_attack_bytes = ARGV[2].nil? ? 3 : ((1..16).include?(ARGV[2].to_i) ? ARGV[2].to_i : 3)   #!# 3 -> glob settings
+try_n_traces = (ARGV[1].to_i <= 0) ? settings[:n_traces] : ARGV[1].to_i
+try_attack_bytes = ARGV[2].nil? ? 16 : ((1..16).include?(ARGV[2].to_i) ? ARGV[2].to_i : 16)
 
 cas = {
-	"dirname" => "../attack/#{GS[:traces_dir]}/#{settings[:name]}",
+	"dirname" => "#{GS[:traces_dir]}/#{settings[:name]}",
 	"n_traces" => try_n_traces,
-	"attack_bytes" => try_attack_bytes,
-	"targetbits" => [0, 1, 2, 3, 4, 5, 6, 7]
+	"attack_bytes" => try_attack_bytes   #,
+	# "targetbits" => [0, 1, 2, 3, 4, 5, 6, 7]
 }
 
-cas_filename = "../cpp_attack/#{settings[:name]}.yaml"
+cas_filename = "#{GS[:traces_dir]}/#{settings[:name]}.yaml"
 File.write(cas_filename, YAML.dump(cas))
 
 puts "Running attack ..."
 puts log = Open3.capture2("../cpp_attack/attack #{cas_filename}")[0]
-FileUtils.rm cas_filename
+File.write("#{GS[:traces_dir]}/#{settings[:name]}__ntr-#{try_n_traces}_by-#{try_attack_bytes}.log", log)
 
 log = log.split(/Attacking[\W]+?[\d]+?\.\Wbyte\W\.\.\./)
 log.slice!(0)
@@ -56,10 +56,12 @@ argmax.each do |row|
 end
 
 p.plot("#{GS[:visual_dir]}/#{settings[:name]}/emph.png")
-puts "Leaking at #{addrs.map{|a|"0x"+a.to_s(16)}.join(", ")}."
+puts "
+o==============================================================================o
+| Leaking at:                                                                  |
+#{addrs.map{|a|"|   0x" + a.to_s(16) + " "*(73-a.to_s(16).length)}.join("|\n")}|
+o==============================================================================o"
 
-puts "Check previous log to see how strong these candidates are. If OK, see \"#{GS[:visual_dir]}/#{settings[:name]}/emph.png\" -- this is where encryption probably takes place. Filter address & row range by
+puts "Check previous log to see how strong these candidates are. If OK, see \"#{GS[:visual_dir]}/#{settings[:name]}/emph.png\" -- this is where encryption probably takes place. You can filter address & row range by
 	$ ./#{MANFLT_FILE} #{settings[:name]}
-Otherwise run attack without range filtering but keep in mind that it will be much slower, run
-	$ cd ../cpp_attack
-	$ ./attack copy_template_and_fill_own_settings.yaml"
+If you have finished attack you can use leaking addresses to find out where the implementation leaks (e.g. in GDB)."

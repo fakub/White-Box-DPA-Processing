@@ -1,4 +1,4 @@
-def save_settings(settings, merge)
+def save_settings(settings, merge = true)
 	FileUtils.mkpath("#{GS[:settings_dir]}")
 	# backup unless merge
 	if File.exists?("#{GS[:settings_dir]}/#{settings[:name]}.yaml") and not merge

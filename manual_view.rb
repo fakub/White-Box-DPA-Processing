@@ -64,7 +64,8 @@ Dir.chdir("#{GS[:visual_dir]}/#{settings[:name]}/#{GS[:man_view_dir]}") do
 	end until $stdin.gets.chomp == "Y"
 end
 
-puts "\nFinal settings:
+puts "
+Final settings:
 	Address from: 0x#{addr_from.to_s 16}
 	Address to: 0x#{addr_to.to_s 16}
 	Line from: #{line_from}
@@ -75,5 +76,5 @@ puts "\nFinal settings:
 
 If you are sure where encryption takes place, filter address & row range by
 	$ ./#{MANFLT_FILE} #{settings[:name]}
-Otherwise you can attack first few bytes and find the place of encryption, run
-	$ ./#{MARKENCR_FILE} #{settings[:name]} n_traces bytes=3"
+If you are not sure you can attack first 1..3 bytes and find the place of encryption, run
+	$ ./#{ATTACK_FILE} #{settings[:name]} (n_traces=-1 bytes=16)"
