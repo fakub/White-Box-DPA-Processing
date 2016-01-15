@@ -16,14 +16,16 @@ def load_settings(name)
 	$stderr.puts("Fatal: file \"#{GS[:settings_dir]}/#{name}.yaml\" not found.") or exit \
 		unless File.exists?("#{GS[:settings_dir]}/#{name}.yaml")
 	
-	$stderr.puts("Fatal: dir \"#{GS[:traces_dir]}/#{settings[:name]}\" not found.") or exit \
-		unless Dir.exists?("#{GS[:traces_dir]}/#{settings[:name]}")
+	$stderr.puts("Fatal: dir \"#{GS[:traces_dir]}/#{name}\" not found.") or exit \
+		unless Dir.exists?("#{GS[:traces_dir]}/#{name}")
 	
-	$stderr.puts("Fatal: dir \"#{GS[:visual_dir]}/#{settings[:name]}\" not found.") or exit \
-		unless Dir.exists?("#{GS[:visual_dir]}/#{settings[:name]}")
+	$stderr.puts("Fatal: dir \"#{GS[:visual_dir]}/#{name}\" not found.") or exit \
+		unless Dir.exists?("#{GS[:visual_dir]}/#{name}")
+	
+	settings = YAML.load(File.read("#{GS[:settings_dir]}/#{name}.yaml"))
 	
 	$stderr.puts("Warning: different amount of traces than claimed in settings.") \
-		unless settings[:n_traces] == Dir["#{GS[:traces_dir]}/#{settings[:name]}/*"].size
+		unless settings[:n_traces] == Dir["#{GS[:traces_dir]}/#{name}/*"].size
 	
-	return YAML.load(File.read("#{GS[:settings_dir]}/#{name}.yaml"))
+	return settings
 end

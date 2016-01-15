@@ -24,7 +24,7 @@ File.write(cas_filename, YAML.dump(cas))
 
 puts "Running attack ..."
 puts log = Open3.capture2("../cpp_attack/attack #{cas_filename}")[0]
-File.write("#{GS[:traces_dir]}/#{settings[:name]}__ntr-#{try_n_traces}_by-#{try_attack_bytes}.log", log)
+File.write("#{GS[:traces_dir]}/#{settings[:name]}__ntraces-#{try_n_traces}_bytes-#{try_attack_bytes}.log", log)
 
 log = log.split(/Attacking[\W]+?[\d]+?\.\Wbyte\W\.\.\./)
 log.slice!(0)

@@ -28,9 +28,11 @@ fltfile = File.basename fltfile
 
 px_in_name = nil
 altfilename = nil
+previewfile = nil
+mask = nil
+i = 0
 
 Dir.chdir("#{GS[:visual_dir]}/#{settings[:name]}/#{GS[:arf_dir]}") do
-	i = 0
 	begin
 		i += 1
 		puts "Now provide desired address/row range in pixels from left/top."
@@ -76,9 +78,13 @@ target_dir = "#{GS[:traces_dir]}/#{target_name}"
 FileUtils.rm_rf(target_dir, secure: true)
 FileUtils.mkpath(target_dir)
 FileUtils.cp(Dir["#{GS[:traces_dir]}/#{settings[:name]}/*"], target_dir)
+FileUtils.mkpath("#{GS[:visual_dir]}/#{target_name}")
+FileUtils.cp("#{GS[:visual_dir]}/#{settings[:name]}/#{GS[:arf_dir]}/%02d.png" % [i], "#{GS[:visual_dir]}/#{target_name}/#{File.basename previewfile}")
 
+filter(["#{GS[:visual_dir]}/#{settings[:name]}/#{GS[:arf_dir]}/#{fltfile}"], mask, :txt)
+FileUtils.mv("#{GS[:visual_dir]}/#{settings[:name]}/#{GS[:arf_dir]}/#{fltfile}.flt", "#{GS[:visual_dir]}/#{target_name}/#{File.basename fltfile}")
+FileUtils.cp("#{GS[:visual_dir]}/#{settings[:name]}/#{GS[:arf_dir]}/#{altfilename}", "#{GS[:traces_dir]}/#{target_name}.alt")
 settings[:name] = target_name
-FileUtils.cp("#{GS[:visual_dir]}/#{settings[:name]}/#{GS[:arf_dir]}/#{altfilename}", "#{GS[:traces_dir]}/#{settings[:name]}.alt")
 
 # use altfilename
 filter(Dir["#{target_dir}/*"], alt_from_file("#{GS[:traces_dir]}/#{settings[:name]}.alt"), :bin)
