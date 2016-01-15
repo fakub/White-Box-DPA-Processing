@@ -1,5 +1,7 @@
 traces
 visual
+settings
+
 find_leakage
 old
 *.yaml
