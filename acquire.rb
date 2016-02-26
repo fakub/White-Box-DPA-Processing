@@ -9,7 +9,7 @@ Usage:
 
 Copy attack_settings.yaml.template and modify the settings.") or exit if ARGV[0].nil?
 
-# load & generate settings
+# generate settings
 settings = gen_settings(ARGV[0])
 
 # check ASLR OFF
@@ -19,17 +19,19 @@ $stderr.puts("Consider
 	$ setarch `uname -m` -R /bin/bash") or exit unless isoff == "Y"
 
 
+# handle existing name
+merge = handle_existing_name(settings)
+
 # acquire & save traces
-#~ sample_pt, merge = get_traces(settings)
-sample_pt = get_traces(settings)
+sample_pt = get_traces(settings, merge)
 
 # create & use & save mask of alternating bytes of traces (non-constant ones)
-alt = alt_mask(settings[:traces_dir])
-filter(Dir["#{settings[:traces_dir]}/*"], alt, :bin, true)
-alt_to_file(alt, settings[:const_filter_file])
+alt = alt_mask(settings.traces_dir)
+filter(Dir["#{settings.traces_dir}/*"], alt, :bin, true)
+alt_to_file(alt, settings.const_filter_file)
 
 # merge traces if told to
-#~ merge_traces(settings) if merge
+merge_traces(settings) if merge
 
 # acquire sample pt again to text & create preview
 tp = trace_preview(settings, sample_pt, alt)
