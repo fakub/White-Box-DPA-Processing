@@ -1,8 +1,6 @@
-traces
-visual
-settings
+data
+*.yaml
+*.log
 
 find_leakage
 old
-*.yaml
-*.log

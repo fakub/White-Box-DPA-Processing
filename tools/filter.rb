@@ -10,7 +10,7 @@ def filter(all_files, alt, mode, verbose = false)
 	$stderr.puts("Invalid mode in filter method.") or exit unless [:bin, :txt].include? mode
 	
 	n_traces = all_files.size
-	ndots = n_traces < GS[:ndots_default] ? n_traces : GS[:ndots_default]
+	ndots = n_traces < GS[:n_dots_default] ? n_traces : GS[:n_dots_default]
 	
 	if verbose
 		puts "\nFiltering traces ..."

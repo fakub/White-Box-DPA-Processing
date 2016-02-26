@@ -1,0 +1,7 @@
+---
+:mode: :ra
+:cmd: "/path/to/my-AES-implementation"
+:ct_row: 1
+:name: "my_attack"
+
+:n_traces: 256

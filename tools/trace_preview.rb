@@ -1,11 +1,11 @@
 def trace_preview(settings, sample_pt, alt)
-	FileUtils.rm_rf("#{GS[:visual_dir]}/#{settings[:name]}", secure: true)
-	FileUtils.mkpath("#{GS[:visual_dir]}/#{settings[:name]}")
+	FileUtils.rm_rf("#{settings[:visual_dir]}", secure: true)
+	FileUtils.mkpath("#{settings[:visual_dir]}")
 	
 	Open3.capture2([settings[:acq][:txt], settings[:cmd], sample_pt].join(" "))
-	filter([GS[:trace_filename][:txt]], alt, :txt)
-	FileUtils.rm GS[:trace_filename][:txt]
-	FileUtils.mv GS[:trace_filename][:txt] + ".flt", "#{GS[:visual_dir]}/#{settings[:name]}/#{sample_pt}.flt"
+	filter([settings[:acq][:trace_filename][:txt]], alt, :txt)
+	FileUtils.rm settings[:acq][:trace_filename][:txt]
+	FileUtils.mv settings[:acq][:trace_filename][:txt] + ".flt", "#{settings[:visual_dir]}/#{sample_pt}.flt"
 	
 	addr_from = 0   # either none or both must be set
 	addr_to = 0xffffffffffff
@@ -15,5 +15,5 @@ def trace_preview(settings, sample_pt, alt)
 	
 	#~ split_files = 1
 	
-	return gen_view("#{GS[:visual_dir]}/#{settings[:name]}/#{sample_pt}.flt", addr_from, addr_to, line_from, line_to, 1, nil, nil).first
+	return gen_view("#{settings[:visual_dir]}/#{sample_pt}.flt", addr_from, addr_to, line_from, line_to, 1, nil, nil).first
 end

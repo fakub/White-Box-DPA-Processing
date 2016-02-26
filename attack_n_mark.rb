@@ -36,7 +36,7 @@ log.each do |lb|
 end
 
 txt_file = Dir["#{GS[:visual_dir]}/#{settings[:name]}/*.flt"].select{|f|f =~ /[0-9a-fA-F]{32}\.flt/}.first
-png_file = Dir["#{GS[:visual_dir]}/#{settings[:name]}/*"].select{|f|f =~ /[0-9a-fA-F]{32}\.flt__[0-9a-fA-F]{12}\-\-[0-9a-fA-F]{12}__[0-9]+?x[0-9]+?\.png/}.first
+png_file = Dir["#{GS[:visual_dir]}/#{settings[:name]}/*.png"].select{|f|f =~ /[0-9a-fA-F]{32}\.flt__[0-9a-fA-F]{12}\-\-[0-9a-fA-F]{12}__[0-9]+?x[0-9]+?\.png/}.first
 
 addr_beg = png_file.match(/__[0-9a-fA-F]{12}\-\-[0-9a-fA-F]{12}__[0-9]+?x[0-9]+?\.png/).to_s.split("--")[0][2..-1].hex
 addr_div = png_file.match(/__[0-9]+?x[0-9]+?\.png/).to_s.split("x")[1].split(".")[0].to_i
@@ -56,11 +56,17 @@ argmax.each do |row|
 end
 
 p.plot("#{GS[:visual_dir]}/#{settings[:name]}/emph.png")
-puts "
+
+#!# dává špatnou adresu !!!
+leak_log = "
+!!! THE FOLLOWING IS INCORRECT !!!
 o==============================================================================o
-| Leaking at:                                                                  |
+| With plaintext #{File.basename(txt_file, ".*")} leaking at:                  |
 #{addrs.map{|a|"|   0x" + a.to_s(16) + " "*(73-a.to_s(16).length)}.join("|\n")}|
 o==============================================================================o"
+
+puts leak_log
+#~ File.append("#{GS[:traces_dir]}/#{settings[:name]}__ntraces-#{try_n_traces}_bytes-#{try_attack_bytes}.log", leak_log)
 
 puts "Check previous log to see how strong these candidates are. If OK, see \"#{GS[:visual_dir]}/#{settings[:name]}/emph.png\" -- this is where encryption probably takes place. You can filter address & row range by
 	$ ./#{MANFLT_FILE} #{settings[:name]}

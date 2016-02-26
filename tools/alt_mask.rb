@@ -1,5 +1,5 @@
-def alt_mask(settings)
-	filter_files = Dir["#{GS[:traces_dir]}/#{settings[:name]}/*"].first GS[:n_for_filter]
+def alt_mask(dirname)
+	filter_files = Dir["#{dirname}/*"].first GS[:n_for_filter]
 	ref = File.read(filter_files.slice!(0)).unpack("C*")
 	alt = [false] * ref.length
 	
