@@ -23,7 +23,7 @@ arg_key = ARGV[4]
 try_n_traces = (arg_ntr.to_i <= 0) ? settings[:n_traces] : arg_ntr.to_i
 try_attack_bytes = (1..16).include?(arg_bytes.to_i) ? arg_bytes.to_i : 16
 $stderr.puts("Warning: invalid hypothesis. Using deafult hypothesis #{GS[:possible_targets].first}.") unless GS[:possible_targets].include? arg_hyp
-hyp = arg_hyp.nil? ? GS[:possible_targets].first : (GS[:possible_targets].include? arg_hyp ? arg_hyp : GS[:possible_targets].first)
+hyp = arg_hyp.nil? ? GS[:possible_targets].first : (GS[:possible_targets].include?(arg_hyp) ? arg_hyp : GS[:possible_targets].first)
 $stderr.puts("Warning: invalid expected key. Using deafult key #{GS[:default_key]}.") if !arg_key.nil? and (arg_key[/\H/] or arg_key.length > 32)
 exp_key = arg_key.nil? ? GS[:default_key] : (!arg_key[/\H/] and arg_key.length <= 32 ? arg_key : GS[:default_key])
 
@@ -59,34 +59,30 @@ addr_beg = settings[:addr_beg]
 addr_div = settings[:addr_div]
 row_div = settings[:row_div]
 
-addrs = []
-p = Plot.new
+addrrows = []
+emphed = "#{settings.traces_dir}/emph.png"
+FileUtils.cp settings.png_preview, emphed
 
 argmax.each do |row|
 	row /= 8   # actual row in text trace
-	addrs << IO.readlines(settings.attack_txt_trace)[row].split[1].hex
+	addrrows << [IO.readlines(settings.attack_txt_trace)[row].split[1].hex, row]
 	
-	apixel = (addrs.last - addr_beg) / addr_div
+	apixel = (addrrows.last[0] - addr_beg) / addr_div
 	rpixel = row / row_div
 	
-	p.emph(rpixel, apixel, 1)
+	emph_in_image(apixel, rpixel, 120, emphed)
 end
 
-# ======================================================================
-
-p.plot("#{settings.traces_dir}/emph.png")
-
-#!# dává špatnou adresu !!!
+#?# někdy dávalo špatnou adresu ale nepříde mi ..?
 leak_log = "
-!!! THE FOLLOWING IS INCORRECT !!!
 o==============================================================================o
-| With plaintext #{File.basename(settings.attack_txt_trace, ".*")} leaking at:                  |
-#{addrs.map{|a|"|   0x" + a.to_s(16) + " "*(73-a.to_s(16).length)}.join("|\n")}|
+| With plaintext #{settings[:sample_pt]} leaks at:                    |
+#{addrrows.map{|addr,row|"|   0x" + addr.to_s(16) + " (at row " + row.to_s + ")" + " "*(63-addr.to_s(16).length-row.to_s.length)}.join("|\n")}|
 o==============================================================================o"
 
 puts leak_log
 #~ File.append("#{GS[:traces_dir]}/#{settings[:name]}__ntraces-#{try_n_traces}_bytes-#{try_attack_bytes}.log", leak_log)
 
-puts "Check previous log to see how strong these candidates are. If OK, see \"#{settings.traces_dir}/emph.png\" -- this is where encryption probably takes place. You can filter address & row range by
+puts "Check previous log to see how strong these candidates are. If OK, see \"#{emphed}\" -- this is where encryption probably takes place. You can filter address & row range by
 	$ ./#{MANFLT_FILE} #{settings[:name]}
 If you have finished attack you can use leaking addresses to find out where the implementation leaks (e.g. in GDB)."
