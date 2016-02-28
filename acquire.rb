@@ -22,27 +22,27 @@ $stderr.puts("Consider
 # handle existing name
 merge = handle_existing_name(settings)
 
-# acquire & save traces
-sample_pt = get_traces(settings, merge)
-
-# create & use & save mask of alternating bytes of traces (non-constant ones)
-alt = alt_mask(settings.traces_dir)
-filter(Dir["#{settings.traces_dir}/*"], alt, :bin, true)
-alt_to_file(alt, settings.const_filter_file)
+# acquire, filter & save traces
+get_bin_traces(settings, merge)
 
 # merge traces if told to
-merge_traces(settings) if merge
+merged = merge_traces(settings) if merge
 
 # acquire sample pt again to text & create preview
-tp = trace_preview(settings, sample_pt, alt)
+unless merge and merged
+	get_txt_trace(settings)
+	settings[:png_filename] = File.basename gen_view(settings.txt_trace, 0, Float::INFINITY, 0, Float::INFINITY, 1, nil, nil).first
+	settings[:addr_beg] = addr_begin(settings[:png_filename])
+	settings[:addr_div] = addr_div(settings[:png_filename])
+	settings[:row_div] = row_div(settings[:png_filename])
+end
 
 # save settings
-#~ save_settings(settings, merge)
 save_settings(settings)
 
 puts "
-Have a look at trace preview in
-	\"#{tp}\".
+Have a look at a trace preview in
+	\"#{settings.png_preview}\".
 If you are sure where encryption takes place, filter address & row range by
 	$ ./#{MANFLT_FILE} #{settings[:name]}
 If you want to split or zoom the memtrace figure, run

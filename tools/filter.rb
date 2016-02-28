@@ -1,9 +1,9 @@
-def alt_from_file(file)
+def mask_from_file(file)
 	File.read(file).scan(/./).map{|c|c == "1"}
 end
 
-def alt_to_file(alt, file)
-	File.write(file, alt.map{|b|b ? "1" : "0"}.join)
+def mask_to_file(mask, file)
+	File.write(file, mask.map{|b|b ? "1" : "0"}.join)
 end
 
 def filter(all_files, alt, mode, verbose = false)

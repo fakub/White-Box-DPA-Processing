@@ -18,14 +18,18 @@ class Settings
 	def initialize(hash)
 		@hash = hash
 	end
+	def reload(hash)
+		@hash = hash
+	end
 	
+	def has_key?(key)
+		@hash.has_key?(key)
+	end
 	def [](key)
+		$stderr.puts("# Warning: uninitialized key \"#{key.to_s}\" accessed!") unless has_key?(key)
 		@hash[key]
 	end
 	def []=(key, value)
 		@hash[key] = value
-	end
-	def has_key?(key)
-		@hash.has_key?(key)
 	end
 end

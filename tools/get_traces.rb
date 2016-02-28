@@ -1,9 +1,9 @@
-def get_traces(settings, merge)
+def get_bin_traces(settings, merge)
 	if merge
-		FileUtils.mv settings.path, "#{settings.path}__bkp"
+		FileUtils.mv settings.path, settings.path__bkp
 	end
 	
-	FileUtils.mkpath(settings.traces_dir)
+	FileUtils.mkpath(settings.bin_traces_dir)
 	prng = Random.new
 	
 	puts "\nAcquiring traces ..."
@@ -12,6 +12,7 @@ def get_traces(settings, merge)
 	
 	pt = nil   # s.t. it persists outside the block
 	
+	# acquire binary traces
 	settings[:n_traces].times do |i|
 		if i*settings.n_dots >= settings[:n_traces]*doti; doti += 1; print "."; end   # progress bar
 		
@@ -26,9 +27,20 @@ PIN probably cannot instrument program due to certain OS limitations. Consider
 	$ exit") or exit unless File.exists? settings.acq[:trace_filename][:bin]
 		$stderr.puts("Incorrect output format, consider changing ct_row parameter.") or exit unless !ct[/\H/] and ct.length == 32
 		
-		FileUtils.mv settings.acq[:trace_filename][:bin], "#{settings.traces_dir}/#{pt}_#{ct}"
+		FileUtils.mv settings.acq[:trace_filename][:bin], "#{settings.bin_traces_dir}/#{pt}_#{ct}"
 	end
 	puts
+	settings[:sample_pt] = pt
 	
-	return pt
+	alt = alt_mask(settings.bin_traces_dir)
+	filter(Dir["#{settings.bin_traces_dir}/*"], alt, :bin, true)
+	mask_to_file(alt, settings.const_filter_file)
+end
+
+def get_txt_trace(settings)
+	Open3.capture2([settings.acq[:txt], settings[:cmd], settings[:sample_pt]].join(" "))
+	
+	filter([settings.acq[:trace_filename][:txt]], mask_from_file(settings.const_filter_file), :txt)
+	FileUtils.mv settings.acq[:trace_filename][:txt], "#{settings.traces_dir}/#{settings[:sample_pt]}"
+	FileUtils.mv settings.acq[:trace_filename][:txt] + ".flt", settings.txt_trace
 end
