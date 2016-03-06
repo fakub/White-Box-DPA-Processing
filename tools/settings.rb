@@ -50,11 +50,8 @@ class Settings
 	def bin_flt_traces_dir
 		"#{flt_traces_dir}/#{GS[:bin_subdir]}"
 	end
-	def attack_traces_dir
-		has_key?(:rpixel_from) ? bin_flt_traces_dir : bin_traces_dir
-	end
-	def attack_txt_trace
-		has_key?(:rpixel_from) ? flt_txt_trace : txt_trace
+	def attack_range_flt
+		has_key?(:rpixel_from)
 	end
 	def visual_dir
 		"#{path}/#{GS[:visual_dir]}"
@@ -67,6 +64,9 @@ class Settings
 	end
 	def attack_dir
 		"#{path}/#{GS[:attack_dir]}"
+	end
+	def cpp_attack_settings_dir
+		"#{attack_dir}/#{GS[:cpp_attack_settings_dir]}"
 	end
 	def settings_file
 		"#{path}/#{GS[:settings_filename]}.yaml"
