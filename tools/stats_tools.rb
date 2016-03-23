@@ -26,12 +26,14 @@ module Enumerable
 		Math.sqrt var
 	end
 	
-	def print_stats(pn = true, ps = true, pm = true, pmed = true, pd = true, prec = 2)
-		puts "      n = #{n}" if pn
-		puts "    sum = %.*f" % [prec, sum] if ps
-		puts "   mean = %.*f" % [prec, mean] if pm
-		puts " median = %.1f" % [median] if pmed
-		puts "    dev = %.*f" % [prec, dev] if pd
+	def print_stats(list, prec = 2)
+		puts "      n = #{n}" if list.include? :n
+		puts "    sum = %.*f" % [prec, sum] if list.include? :sum
+		puts "   mean = %.*f" % [prec, mean] if list.include? :mean
+		puts " median = %.1f" % [median] if list.include? :median
+		puts "    dev = %.*f" % [prec, dev] if list.include? :dev
+		puts "    max = %.*f" % [prec, max] if list.include? :max
+		puts "    min = %.*f" % [prec, min] if list.include? :min
 	end
 	
 	def print_hist(max_width = 100)

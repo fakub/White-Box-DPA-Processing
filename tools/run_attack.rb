@@ -1,4 +1,4 @@
-def run_attack(settings, n_traces, attack_byte, target, exp_key_str)
+def run_attack(settings, arg_attn, n_traces, attack_byte, target, exp_key_str)
 	cas = {
 		"dirname" => settings.attack_range_flt ? settings.bin_flt_traces_dir : settings.bin_traces_dir,
 		"n_traces" => n_traces,
@@ -8,14 +8,14 @@ def run_attack(settings, n_traces, attack_byte, target, exp_key_str)
 	}
 	exp_key = [exp_key_str].pack("H*").unpack("C*")
 	
-	path = "#{settings.attack_dir}/#{n_traces}"
-	attack_name = "#{attack_byte}_0x#{target}"
+	path = "#{settings.attack_dir}/#{arg_attn}"
+	attack_name = "#{n_traces}_#{attack_byte}_#{target}"
 	res_filename = "#{path}/#{attack_name}.yaml"
 	#~ log_filename = "#{path}/#{attack_name}.log"
 	log_filename = "/dev/null"
 	
 	# save C++ attack settings
-	cas_filename = "#{settings.cpp_attack_settings_dir}/#{n_traces}_#{attack_name}.yaml"
+	cas_filename = "#{settings.cpp_attack_settings_dir}/#{arg_attn}_#{attack_name}.yaml"
 	FileUtils.mkpath settings.cpp_attack_settings_dir
 	File.write(cas_filename, YAML.dump(cas))
 	

@@ -5,35 +5,35 @@ require "./tools/all.rb"
 # print help
 $stderr.puts("
 Usage:
-	$ #{File.basename(__FILE__)} name (n_traces=-1 loc_limit=9.0 glob_limit=27.0 outmode=txt/latex verbose=false)") or exit if ARGV[0].nil?
+	$ #{File.basename(__FILE__)} name attack_name (loc_limit=10.0 type=x0f outmode=txt(/latex) verbose=false)
+
+") or exit if ARGV[0].nil?
 
 # load settings
 settings = load_settings(ARGV[0])
 
-arg_ntr = ARGV[1]
+arg_attn = ARGV[1]
 arg_loc_limit = ARGV[2]
-arg_glob_limit = ARGV[3]
+arg_type = ARGV[3]
 arg_outmode = ARGV[4]
 arg_verbose = ARGV[5]
 
-n_traces = (arg_ntr.to_i <= 0) ? settings[:n_traces] : arg_ntr.to_i
 outmode = ["txt", "latex"].include?(arg_outmode) ? arg_outmode : "txt"
-emph = outmode == "latex" ? {true => "$\\blacksquare$", false => "$\\boxtimes$"} : {true => "\u2588", false => "\u259e", ltd: {true => "\u2584", false => "\u2596"}, correct: "\u2592"}
+emph = outmode == "latex" ? {true => "$\\blacksquare$", false => "$\\boxtimes$"} : {true => "\u2588", false => "\u259e", ltd: {true => "\u2584", false => " "}}
+# correct: "\u2592"
 verbose = arg_verbose.nil? ? true : arg_verbose == "true"
-loc_limit = (arg_loc_limit.to_f <= 0) ? 9.0 : arg_loc_limit.to_f
-glob_limit = (arg_glob_limit.to_f <= 0) ? 27.0 : arg_glob_limit.to_f
+loc_limit = (arg_loc_limit.to_f <= 0) ? 10.0 : arg_loc_limit.to_f
+type = arg_type.nil? ? :x0f : arg_type.to_sym
 
-path = "#{settings.attack_dir}/#{n_traces}"
-line_len = 114
+path = "#{settings.attack_dir}/#{arg_attn}"
+line_len = 153
 
 # load processed results
 proc_res = YAML.load(File.read("#{path}_results.yaml"))
-all_true_max = []
-all_true_max_n = []
-all_false_max = []
-all_false_max_n = []
-all_leak_bit = [0] * 8
-target_success = {}
+
+cand_gaps = []
+leak_bit = [0] * 8
+target_group_leaks = {}
 
 if outmode == "latex"
 	puts "\\hline"
@@ -46,124 +46,134 @@ end
 
 proc_res[:bytes].each.with_index do |byte_res, byte|
 	next if byte_res.nil?
-	if outmode == "txt"
+	ctr = 0
+	if outmode == "txt" and verbose
 		puts "\n   Results of #{byte}. byte"
-		puts "=" * line_len if verbose
-		puts " Target  |                                  Target bits" + " " * (line_len - 56) + "|" if verbose
+		puts "–" * line_len
 	end
 	
-	true_max = []
-	false_max = []
-	false_cands = {}
-	leak_bit = [0] * 8
-	
-	byte_res[:targets].sort.each do |target, target_res|
+	byte_res[:targets].sort.each do |target_str, target_res|
 		next if target_res.nil?
-		target_str = "%02x" % [target]
+		ctr += 1
+		#~ :gap: 2.401379322910968
+		#~ :cand: 107
+		#~ :leak_index: 840
+		#~ :true_cand_pos: 213
+		#~ :correct: false
 		
-		line = target_res[:line]
-		cand_vals = target_res[:cand_vals]
-		true_cand = target_res[:true_cand]
+		gap = target_res[:gap]
+		cand = target_res[:cand]
+		leak_index = target_res[:leak_index]
+		true_cand_pos = target_res[:true_cand_pos]
+		correct = target_res[:correct]
 		
-		# keep only values > loc_limit
-		cand_vals.each{|cand,vals|vals.select!{|v|v > loc_limit}}
-		cand_sums = cand_vals.map{|cand,vals|[cand,vals.sum]}.to_h
-		
-		best_cand, max_val = cand_sums.max_by{|cand,sum|sum}
-		success = best_cand == true_cand
-		
-		if max_val > glob_limit
-			if success
-				#~ target_success[target_str] = [0.0, 0] unless target_success.has_key? target_str
-				#~ target_success[target_str][0] += cand_sum[best_cand]
-				#~ target_success[target_str][1] += line.count{|e|e[1] == best_cand}
-				target_success[target_str] = 0 unless target_success.has_key? target_str
-				target_success[target_str] += line.count{|e|e[3] and e[0] > loc_limit}
-				
-				true_max << cand_vals[best_cand]
-				line.select{|e|e[3] and e[0] > loc_limit}.each{|e|leak_bit[e[2] % 8] += 1}
-			else
-				false_max << cand_vals[best_cand]
-				false_cands[best_cand] = [] unless false_cands.has_key? best_cand
-				false_cands[best_cand] << cand_vals[best_cand].sum
+		if gap > loc_limit
+			cand_gaps[byte] = {} if cand_gaps[byte].nil?
+			cand_gaps[byte][cand] = [] unless cand_gaps[byte].has_key? cand
+			cand_gaps[byte][cand] << gap
+			
+			if correct
+				leak_bit[leak_index % 8] += 1
+				# target group and its size
+				tg, ts = group_of_target(target_str, type)
+				target_group_leaks[tg] = {gaps: [], size: ts} unless target_group_leaks.has_key? tg
+				target_group_leaks[tg][:gaps] << gap
 			end
 		end
 		
 		if verbose
 			if outmode == "txt"
 				# readable output
-				puts "-" * line_len
-				print "   0x#{target_str}  |"
-				8.times do |tb|
-					em = (line[tb][1] == best_cand) ? \
-							(cand_sums[best_cand] > glob_limit ? emph[line[tb][3]] : emph[:ltd][line[tb][3]]) : \
-							(line[tb][1] == true_cand ? emph[:correct] : " ")
-					print "%3d #{em}%5.2f%s|" % [line[tb][4], line[tb][0], line[tb][1] == true_cand ? "/#{line[tb][2] % 8}" : "  "]
-				end
-				puts
+				em = correct ? \
+						(gap > loc_limit ? emph[true] : emph[:ltd][true]) : \
+						(gap > loc_limit ? emph[false] : emph[:ltd][false])
+				print "#{em}%2.0f" % [gap]
+				puts if ctr % 51 == 0
 			elsif byte == 0   #!#
 				# LaTeX output
 				#~ print "#{byte}.&"
-				print "{\\tt #{target_str}}&"
+				#~ print "{\\tt #{target_str}}&"
 				# format: ... | gap true_cand_pos | ...
-				print (0..7).to_a.map{|tb|("%.1f&" % [line[tb][0]]).sub(".", "&") + (line[tb][3] ? emph[true] : line[tb][4].to_s)}.join("&")
-				puts "\\\\"
-				puts "\\hline"
+				#~ print (0..7).to_a.map{|tb|("%.1f&" % [line[tb][0]]).sub(".", "&") + (line[tb][3] ? emph[true] : line[tb][4].to_s)}.join("&")
+				#~ puts "\\\\"
+				#~ puts "\\hline"
 			end
 		end
 	end
-	puts "=" * line_len if outmode == "txt"
-	
-	all_true_max << true_max
-	all_true_max_n << true_max.size
-	all_false_max << false_max
-	all_false_max_n << false_max.size
-	all_leak_bit = all_leak_bit.zip(leak_bit).map{|e|e.sum}
-	
-	if outmode == "txt"
-		# readable output
-		
-		puts " #{emph[true]} correct candidates:"
-		true_max.flatten!
-		true_max.print_stats(true, false)
-		puts "---------------------------------"
-		puts " #{emph[false]} false positives:"
-		false_max.flatten!
-		false_max.print_stats(true, false)
-		puts "---------------------------------"
-		false_cands.sort{|a,b|a[1].length <=> b[1].length}.each do |cand,vals|
-			puts "    %02x" % [cand]
-			vals.print_hist
-			#~ vals.print_stats(true, true, false, false, false)
-		end
-		puts "---------------------------------"
-		puts " # of leaks for each bit:"
-		leak_bit.print_hist
-	end
+	puts "\n"
 end
 
-all_true_max.flatten!
-all_false_max.flatten!
-
 if outmode == "txt"
-	puts "\n Overal results"
+	puts "\n   Overal results"
 	puts "=" * line_len
 	
-	puts " # of correct candidates:"
-	all_true_max_n.print_stats(false, false)
-	puts " # of false candidates:"
-	all_false_max_n.print_stats(false, false)
+	puts " #{emph[true]} correct candidates' values byte-wise (out of 255):"
+	true_cand_gaps = []
+	false_pos = []
+	second_n = []
+	cand_gaps.each.with_index do |cgs,byte|
+		true_cand = proc_res[:bytes][byte][:true_cand]
+		
+		puts "----------------------\n #{byte}. byte:"
+		cgs[true_cand].print_stats([:n, :sum, :mean])
+		
+		cgs_sort_n = cgs.sort_by{|cand,gaps|gaps.n}.reverse
+		cgs_sort_mean = cgs.sort_by{|cand,gaps|gaps.mean}.reverse
+		cgs_sort_sum = cgs.sort_by{|cand,gaps|gaps.sum}.reverse
+		
+		if cgs_sort_n[0][0] == true_cand
+			puts " 2nd best by n: 0x%02x" % [cgs_sort_n[1][0]]
+			cgs_sort_n[1][1].print_stats([:n])
+			second_n << cgs_sort_n[1][1].n
+		else
+			puts " #{emph[false]} best by n: 0x%02x" % [cgs_sort_n[0][0]]
+			cgs_sort_n[0][1].print_stats([:n])
+			false_pos << byte
+		end
+		if cgs_sort_mean[0][0] == true_cand
+			puts " 2nd best by mean: 0x%02x" % [cgs_sort_mean[1][0]]
+			cgs_sort_mean[1][1].print_stats([:mean])
+		else
+			puts " #{emph[false]} best by mean: 0x%02x" % [cgs_sort_mean[0][0]]
+			cgs_sort_mean[0][1].print_stats([:mean])
+			false_pos << byte
+		end
+		if cgs_sort_sum[0][0] == true_cand
+			puts " 2nd best by sum: 0x%02x" % [cgs_sort_sum[1][0]]
+			cgs_sort_sum[1][1].print_stats([:sum])
+		else
+			puts " #{emph[false]} best by sum: 0x%02x" % [cgs_sort_n[0][0]]
+			cgs_sort_sum[0][1].print_stats([:sum])
+			false_pos << byte
+		end
+		
+		
+		true_cand_gaps.concat cgs[true_cand]
+	end
 	puts "---------------------------------"
 	
-	puts " #{emph[true]} correct candidates value:"
-	all_true_max.print_stats(true, false)
+	puts " 2nd best:"
+	second_n.print_stats([:mean, :max])
 	puts "---------------------------------"
-	puts " #{emph[false]} false positives value:"
-	all_false_max.print_stats(true, false)
+	
+	puts " False positives: #{false_pos.to_s}"
 	puts "---------------------------------"
+	
+	puts " #{emph[true]} correct candidates' values overal (out of 4080):"
+	true_cand_gaps.print_stats([:n, :mean, :median, :dev])
+	puts "---------------------------------"
+	
+	#~ puts " #{emph[false]} false positives value:"
+	#~ all_false_max.print_stats(true, false)
+	#~ puts "---------------------------------"
+	
 	puts " # of leaks for each bit:"
-	all_leak_bit.print_hist
+	puts leak_bit.to_s
+	leak_bit.print_hist
 	puts "---------------------------------"
-	puts " # of leaks for each target:"
-	target_success.print_hist
+	
+	puts " # of leaks for each group of targets (type = ...):"
+	gl_n = Hash[target_group_leaks.map{|k,v|[k,v[:gaps].size.to_f / (v[:size] * 16) * 100]}]
+	puts gl_n.to_s
+	gl_n.print_hist
 end
