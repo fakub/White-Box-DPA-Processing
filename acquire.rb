@@ -5,21 +5,27 @@ require "./tools/all.rb"
 # print help
 $stderr.puts("
 Usage:
-	$ #{File.basename(__FILE__)} attack_settings.yaml
+	$ ./#{File.basename(__FILE__)} attack_settings.yaml
 
-Copy attack_settings.yaml.template and modify the settings.") or exit if ARGV[0].nil?
+Copy '#{SETT_TEMPL_FILE}', modify the settings and run again with your settings file.
 
-# generate settings
+") or exit if ARGV[0].nil?
+
+# generate settings from argument
 settings = gen_settings(ARGV[0])
 
-# check ASLR OFF
-$stderr.print("Is ASLR really OFF? (Y/n) ")
+# check ASLR, is it OFF?
+$stderr.print("
+Is ASLR really OFF? (Y/n) ")
 isoff = $stdin.gets.chomp
-$stderr.puts("Consider
-	$ setarch `uname -m` -R /bin/bash") or exit unless isoff == "Y"
+$stderr.puts("
+Consider
+	$ setarch `uname -m` -R /bin/bash
+
+") or exit unless isoff == "Y"
 
 
-# handle existing name
+# handle existing name (ask user)
 merge = handle_existing_name(settings)
 
 # acquire, filter & save traces
@@ -40,12 +46,13 @@ end
 # save settings
 save_settings(settings)
 
+
+# print hints what to do next
 puts "
 Have a look at a trace preview in
-	\"#{settings.png_preview}\".
-If you are sure where encryption takes place, filter address & row range by
-	$ ./#{MANFLT_FILE} #{settings[:name]}
-If you want to split or zoom the memtrace figure, run
-	$ ./#{MANVIEW_FILE} #{settings[:name]}
-If you are not sure you can attack first 1..3 bytes and find the place of encryption, run
-	$ ./#{ATTACK_FILE} #{settings[:name]} (n_traces=-1 bytes=16)"
+	'#{settings.png_preview}'"
+
+tell_filter_ranges(settings)
+tell_manual_view(settings)
+tell_attack_first_bytes(settings)
+puts

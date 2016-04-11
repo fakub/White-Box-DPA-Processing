@@ -5,7 +5,7 @@ require "./tools/all.rb"
 # print help
 $stderr.puts("
 Usage:
-	$ #{File.basename(__FILE__)} name attack_name (expected_key=2b7e151628aed2a6abf7158809cf4f3c)
+	$ ./#{File.basename(__FILE__)} name attack_name (expected_key=2b7e151628aed2a6abf7158809cf4f3c)
 
 ") or exit if ARGV[0].nil?
 
@@ -37,6 +37,7 @@ Dir["#{path}/*.yaml"].each do |res_filename|
 	n_traces, byte, target_str = File.basename(res_filename, ".yaml").split("_")
 	byte = byte.to_i
 	
+	#~ 0:   # target bit, might be only one
 	#~ - - 0.5852212
 	#~   - 43   # expected
 	#~   - 8
@@ -47,23 +48,27 @@ Dir["#{path}/*.yaml"].each do |res_filename|
 	proc_res[:bytes] = [] unless proc_res.has_key? :bytes
 	proc_res[:bytes][byte] = {} if proc_res[:bytes][byte].nil?
 	proc_res[:bytes][byte][:targets] = {} unless proc_res[:bytes][byte].has_key? :targets
-	proc_res[:bytes][byte][:targets][target_str] = {} unless proc_res[:bytes][byte][:targets].has_key? target_str
+	# target_str moved
 	proc_res[:bytes][byte][:true_cand] = exp_key[byte] unless proc_res[:bytes][byte].has_key? :true_cand
 	proc_res[:bytes][byte][true] = [] unless proc_res[:bytes][byte].has_key? true
 	proc_res[:bytes][byte][false] = [] unless proc_res[:bytes][byte].has_key? false
 	proc_res[:bytes][byte][:leak_bit] = [0] * 8 unless proc_res[:bytes][byte].has_key? :leak_bit
 	
 	# process results
-	gap = (results[0][0] - results[1][0]) / results[0][0] * 100
-	cand = results[0][1]
-	leak_index = results[0][2]
-	true_cand_pos = results.index{|e|e[1] == exp_key[byte]}
-	
-	proc_res[:bytes][byte][:targets][target_str][:gap] = gap
-	proc_res[:bytes][byte][:targets][target_str][:cand] = cand
-	proc_res[:bytes][byte][:targets][target_str][:leak_index] = leak_index
-	proc_res[:bytes][byte][:targets][target_str][:true_cand_pos] = true_cand_pos
-	proc_res[:bytes][byte][:targets][target_str][:correct] = exp_key[byte] == cand
+	results.each do |tbit, res_tb|
+		gap = (res_tb[0][0] - res_tb[1][0]) / res_tb[0][0] * 100
+		cand = res_tb[0][1]
+		leak_index = res_tb[0][2]
+		true_cand_pos = res_tb.index{|e|e[1] == exp_key[byte]}
+		
+		t_str = results.size > 1 ? target_str + "/#{tbit}" : target_str
+		proc_res[:bytes][byte][:targets][t_str] = {} unless proc_res[:bytes][byte][:targets].has_key? t_str
+		proc_res[:bytes][byte][:targets][t_str][:gap] = gap
+		proc_res[:bytes][byte][:targets][t_str][:cand] = cand
+		proc_res[:bytes][byte][:targets][t_str][:leak_index] = leak_index
+		proc_res[:bytes][byte][:targets][t_str][:true_cand_pos] = true_cand_pos
+		proc_res[:bytes][byte][:targets][t_str][:correct] = exp_key[byte] == cand
+	end
 end
 $stderr.puts
 

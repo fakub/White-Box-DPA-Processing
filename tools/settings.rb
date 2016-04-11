@@ -32,6 +32,9 @@ class Settings
 	def flt_traces_dir
 		"#{path}/#{GS[:flt_traces_dir]}__#{px_in_name}"
 	end
+	def bin_flt_traces_dir
+		"#{flt_traces_dir}/#{GS[:bin_subdir]}"
+	end
 	def range_filter_file
 		"#{flt_traces_dir}/#{GS[:range_filter_filename]}__#{px_in_name}.msk"
 	end
@@ -46,9 +49,6 @@ class Settings
 	end
 	def flt_png_preview
 		"#{flt_traces_dir}/trace.png"
-	end
-	def bin_flt_traces_dir
-		"#{flt_traces_dir}/#{GS[:bin_subdir]}"
 	end
 	def attack_range_flt
 		has_key?(:rpixel_from)

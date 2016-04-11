@@ -4,25 +4,26 @@ def handle_existing_name(settings)
 	if Dir.exists?(settings.path)
 		print "
 Name \"#{settings[:name]}\" already exists.
+
 Merge new traces with existing (M), or
 delete old traces and acquire new (D), or
 use different name (N), or
 cancel (C)? "
 		ch = $stdin.gets.chomp
 		if merge = ch == "M"
-			puts "Will try to merge."
+			puts "\nWill try to merge."
 		elsif ch == "D"
 			FileUtils.rm_rf(settings.path, secure: true)
-			puts "Old traces deleted."
+			puts "\nOld traces deleted."
 		elsif ch == "N"
-			print "Enter new name: "
+			print "\nEnter new name: "
 			begin
 				newname = $stdin.gets.chomp
 			end while Dir.exists?("#{GS[:data_dir]}/#{newname}") and (print("Name #{newname} exists, enter a different name: ") or true)
 			settings[:name] = newname
 			puts "Continuing with a new name \"#{newname}\"."
 		else
-			$stderr.puts "Cancelled, exiting." or exit
+			$stderr.puts "\nCancelled, exiting." or exit
 		end
 	end
 	

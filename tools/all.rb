@@ -8,9 +8,11 @@ Dir["./tools/*.rb"].each{|file| require file }
 GS = YAML.load(File.read("glob_settings.yaml"))
 
 ACQ_FILE = "acquire.rb"
+	SETT_TEMPL_FILE = "attack_settings.yaml.template"
 MANFLT_FILE = "addr_row_filter.rb"
 MANVIEW_FILE = "manual_view.rb"
-ATTACK_FILE = "attack_n_mark.rb"
+ATTACK_FILE = "attack.rb"
+MARK_ENCR_FILE = "mark_encryption.rb"
 
 class Settings
 	attr_reader :hash

@@ -26,14 +26,24 @@ module Enumerable
 		Math.sqrt var
 	end
 	
+	def sup
+		return -Float::INFINITY if empty?
+		return max
+	end
+	
+	def inf
+		return Float::INFINITY if empty?
+		return min
+	end
+	
 	def print_stats(list, prec = 2)
 		puts "      n = #{n}" if list.include? :n
 		puts "    sum = %.*f" % [prec, sum] if list.include? :sum
 		puts "   mean = %.*f" % [prec, mean] if list.include? :mean
 		puts " median = %.1f" % [median] if list.include? :median
 		puts "    dev = %.*f" % [prec, dev] if list.include? :dev
-		puts "    max = %.*f" % [prec, max] if list.include? :max
-		puts "    min = %.*f" % [prec, min] if list.include? :min
+		puts "    max = %.*f" % [prec, sup] if list.include? :max
+		puts "    min = %.*f" % [prec, inf] if list.include? :min
 	end
 	
 	def print_hist(max_width = 100)

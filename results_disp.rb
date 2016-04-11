@@ -5,7 +5,7 @@ require "./tools/all.rb"
 # print help
 $stderr.puts("
 Usage:
-	$ #{File.basename(__FILE__)} name attack_name (loc_limit=10.0 type=x0f outmode=txt(/latex) verbose=false)
+	$ ./#{File.basename(__FILE__)} name attack_name (loc_limit=10.0 type=x0f outmode=txt(/latex) verbose=false)
 
 ") or exit if ARGV[0].nil?
 
@@ -52,6 +52,7 @@ proc_res[:bytes].each.with_index do |byte_res, byte|
 		puts "–" * line_len
 	end
 	
+	long = byte_res[:targets].size > 16
 	byte_res[:targets].sort.each do |target_str, target_res|
 		next if target_res.nil?
 		ctr += 1
@@ -87,8 +88,13 @@ proc_res[:bytes].each.with_index do |byte_res, byte|
 				em = correct ? \
 						(gap > loc_limit ? emph[true] : emph[:ltd][true]) : \
 						(gap > loc_limit ? emph[false] : emph[:ltd][false])
-				print "#{em}%2.0f" % [gap]
-				puts if ctr % 51 == 0
+				if long
+					print "#{em}%2.0f" % [gap]
+					puts if ctr % 51 == 0
+				else
+					print " | #{em} %4.1f (%3d)" % [gap, true_cand_pos]
+					puts if ctr % 51 == 0
+				end
 			elsif byte == 0   #!#
 				# LaTeX output
 				#~ print "#{byte}.&"
@@ -109,58 +115,78 @@ if outmode == "txt"
 	
 	puts " #{emph[true]} correct candidates' values byte-wise (out of 255):"
 	true_cand_gaps = []
-	false_pos = []
+	false_cand_gaps = []
 	second_n = []
+	
 	cand_gaps.each.with_index do |cgs,byte|
 		true_cand = proc_res[:bytes][byte][:true_cand]
 		
 		puts "----------------------\n #{byte}. byte:"
+		if cgs.nil? or cgs[true_cand].nil?
+			puts "No candidate exceeded the limit."
+			next
+		end
 		cgs[true_cand].print_stats([:n, :sum, :mean])
 		
 		cgs_sort_n = cgs.sort_by{|cand,gaps|gaps.n}.reverse
 		cgs_sort_mean = cgs.sort_by{|cand,gaps|gaps.mean}.reverse
 		cgs_sort_sum = cgs.sort_by{|cand,gaps|gaps.sum}.reverse
 		
-		if cgs_sort_n[0][0] == true_cand
-			puts " 2nd best by n: 0x%02x" % [cgs_sort_n[1][0]]
-			cgs_sort_n[1][1].print_stats([:n])
-			second_n << cgs_sort_n[1][1].n
+		if cgs.size > 1
+			if cgs_sort_n[0][0] == true_cand
+				puts " 2nd best by n: 0x%02x" % [cgs_sort_n[1][0]]
+				cgs_sort_n[1][1].print_stats([:n])
+				second_n << cgs_sort_n[1][1].n
+			else
+				puts " #{emph[false]} best by n: 0x%02x" % [cgs_sort_n[0][0]]
+				cgs_sort_n[0][1].print_stats([:n])
+				#~ false_pos << byte
+			end
+			if cgs_sort_mean[0][0] == true_cand
+				puts " 2nd best by mean: 0x%02x" % [cgs_sort_mean[1][0]]
+				cgs_sort_mean[1][1].print_stats([:mean])
+			else
+				puts " #{emph[false]} best by mean: 0x%02x" % [cgs_sort_mean[0][0]]
+				cgs_sort_mean[0][1].print_stats([:mean])
+				#~ false_pos << byte
+			end
+			if cgs_sort_sum[0][0] == true_cand
+				puts " 2nd best by sum: 0x%02x" % [cgs_sort_sum[1][0]]
+				cgs_sort_sum[1][1].print_stats([:sum])
+			else
+				puts " #{emph[false]} best by sum: 0x%02x" % [cgs_sort_n[0][0]]
+				cgs_sort_sum[0][1].print_stats([:sum])
+				#~ false_pos << byte
+			end
 		else
-			puts " #{emph[false]} best by n: 0x%02x" % [cgs_sort_n[0][0]]
-			cgs_sort_n[0][1].print_stats([:n])
-			false_pos << byte
-		end
-		if cgs_sort_mean[0][0] == true_cand
-			puts " 2nd best by mean: 0x%02x" % [cgs_sort_mean[1][0]]
-			cgs_sort_mean[1][1].print_stats([:mean])
-		else
-			puts " #{emph[false]} best by mean: 0x%02x" % [cgs_sort_mean[0][0]]
-			cgs_sort_mean[0][1].print_stats([:mean])
-			false_pos << byte
-		end
-		if cgs_sort_sum[0][0] == true_cand
-			puts " 2nd best by sum: 0x%02x" % [cgs_sort_sum[1][0]]
-			cgs_sort_sum[1][1].print_stats([:sum])
-		else
-			puts " #{emph[false]} best by sum: 0x%02x" % [cgs_sort_n[0][0]]
-			cgs_sort_sum[0][1].print_stats([:sum])
-			false_pos << byte
+			if cgs.to_a[0][0] == true_cand
+				puts "Only correct candidate exceeded the limit."
+			else
+				puts "Only #{emph[false]} incorrect candidate #{cgs.to_a[0][0]} exceeded the limit."
+			end
 		end
 		
 		
 		true_cand_gaps.concat cgs[true_cand]
+		cgs.each do |cand, gaps|
+			false_cand_gaps.concat gaps unless cand == true_cand
+		end
 	end
 	puts "---------------------------------"
 	
-	puts " 2nd best:"
-	second_n.print_stats([:mean, :max])
-	puts "---------------------------------"
-	
-	puts " False positives: #{false_pos.to_s}"
-	puts "---------------------------------"
+	#~ puts " False positives: #{false_pos.to_s}"
+	#~ puts "---------------------------------"
 	
 	puts " #{emph[true]} correct candidates' values overal (out of 4080):"
-	true_cand_gaps.print_stats([:n, :mean, :median, :dev])
+	true_cand_gaps.print_stats([:n, :mean, :median, :dev, :max])
+	puts "---------------------------------"
+	
+	puts " #{emph[false]} incorrect candidates' values overal (out of 4080):"
+	false_cand_gaps.print_stats([:n, :mean, :median, :dev, :max])
+	puts "---------------------------------"
+	
+	puts " 2nd best:"
+	second_n.print_stats([:mean, :dev, :max])
 	puts "---------------------------------"
 	
 	#~ puts " #{emph[false]} false positives value:"

@@ -14,6 +14,8 @@ def add_node_to_plot(node, plot, addr_offset, row_offset, addr_div, row_div)
 end
 
 def gen_view(filename, addr_from, addr_to, line_from, line_to, split_files, row_div_arg, addr_div_arg, verbose = false)
+	puts "\nGenerating preview ..."
+	
 	begin
 		h = {}
 		row = -1

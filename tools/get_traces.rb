@@ -20,11 +20,12 @@ def get_bin_traces(settings, merge)
 		ct = Open3.capture2([settings.acq[:bin], settings[:cmd], pt].join(" "))[0].split(/\n/)[settings[:ct_row]-1].gsub(/\s+/, "")
 		
 		$stderr.puts("
-Trying `#{[settings.acq[:bin], settings[:cmd], pt].join(" ")}` but no result found.
+Running `#{[settings.acq[:bin], settings[:cmd], pt].join(" ")}` but no result found.
+
 PIN probably cannot instrument program due to certain OS limitations. Consider
-	$ sudo su
-	$ echo 0 > /proc/sys/kernel/yama/ptrace_scope
-	$ exit") or exit unless File.exists? settings.acq[:trace_filename][:bin]
+	$ sudo echo 0 > /proc/sys/kernel/yama/ptrace_scope
+
+") or exit unless File.exists? settings.acq[:trace_filename][:bin]
 		$stderr.puts("Incorrect output format, consider changing ct_row parameter.") or exit unless !ct[/\H/] and ct.length == 32
 		
 		FileUtils.mv settings.acq[:trace_filename][:bin], "#{settings.bin_traces_dir}/#{pt}_#{ct}"

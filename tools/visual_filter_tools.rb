@@ -38,7 +38,9 @@ def range_filtering(settings, playground = true)
 	
 	begin
 		i += 1
-		puts "Provide desired address/row range in pixels from left/top."
+		puts "\nSee\n\t'#{settings.png_preview}'\nand provide desired address/row range in pixels from left/top.
+
+"
 		
 		begin
 			print "Address pixel from: "
@@ -75,6 +77,7 @@ def range_filtering(settings, playground = true)
 			addr_div_arg = addr_div_arg == 0 ? nil : addr_div_arg
 		end
 		
+		#!# something crashes if the range does not contain any entry
 		pvfiles = gen_view(fltfile, addr_from, addr_to, row_from, row_to, split_files, addr_div_arg, row_div_arg)
 		pvfiles.each.with_index do |pvfile,j|
 			FileUtils.mv pvfile, "#{mypath}/%02d_%02d__#{File.basename pvfile}" % [i,j]
@@ -93,12 +96,11 @@ def range_filtering(settings, playground = true)
 		settings[:split_files] = split_files
 		settings[:row_div_arg] = row_div_arg
 		settings[:addr_div_arg] = addr_div_arg
+	else
+		FileUtils.rm_rf(settings.flt_traces_dir, secure: true)
+		FileUtils.mkpath(settings.bin_flt_traces_dir)
+		mask_to_file(range_mask(fltfile, addr_from, addr_to, row_from, row_to), settings.range_filter_file)
 	end
-	
-	FileUtils.rm_rf(settings.flt_traces_dir, secure: true)
-	FileUtils.mkpath(settings.bin_flt_traces_dir)
-	
-	mask_to_file(range_mask(fltfile, addr_from, addr_to, row_from, row_to), settings.range_filter_file) unless playground
 	
 	return last_png
 end
