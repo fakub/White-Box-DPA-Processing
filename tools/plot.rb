@@ -1,3 +1,7 @@
+# class handling image
+# don't ask me why ...
+# magic ...
+
 require 'rmagick'
 include Magick
 

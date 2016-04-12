@@ -5,19 +5,23 @@ require "./tools/all.rb"
 # print help
 $stderr.puts("
 Usage:
-	$ ./#{File.basename(__FILE__)} name attack_name (expected_key=2b7e151628aed2a6abf7158809cf4f3c)
+	$ ./#{File.basename(__FILE__)} <name> <attack_name> [2b7e151628aed2a6abf7158809cf4f3c]
+
+where
+	2b7e... expected key
 
 ") or exit if ARGV[0].nil?
 
 # load settings
 settings = load_settings(ARGV[0])
 
+# read arguments
 arg_attn = ARGV[1]
 arg_key = ARGV[2]
+# set expected key
+exp_key = set_exp_key(arg_key)
 
-exp_key_str = arg_key.nil? ? GS[:default_key] : (!arg_key[/\H/] and arg_key.length == 32 ? arg_key : GS[:default_key])
-exp_key = [exp_key_str].pack("H*").unpack("C*")
-
+# set path
 path = "#{settings.attack_dir}/#{arg_attn}"
 
 # init processed results
@@ -72,4 +76,9 @@ Dir["#{path}/*.yaml"].each do |res_filename|
 end
 $stderr.puts
 
+# write results
 File.write("#{path}_results.yaml", YAML.dump(proc_res))
+
+# next steps
+tell_results_disp(settings, arg_attn)
+puts

@@ -1,4 +1,7 @@
+# method which runs actual attack once everything is prepared
+
 def run_attack(settings, arg_attn, n_traces, attack_byte, target, exp_key_str)
+	# C++ attack settings
 	cas = {
 		"dirname" => settings.attack_range_flt ? settings.bin_flt_traces_dir : settings.bin_traces_dir,
 		"n_traces" => n_traces,

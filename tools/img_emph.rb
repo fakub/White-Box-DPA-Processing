@@ -1,3 +1,5 @@
+# emphasize pixel in image with square
+
 require 'rmagick'
 include Magick
 

@@ -5,7 +5,7 @@ require "./tools/all.rb"
 # print help
 $stderr.puts("
 Usage:
-	$ ./#{File.basename(__FILE__)} name
+	$ ./#{File.basename(__FILE__)} <name>
 
 ") or exit if ARGV[0].nil?
 
@@ -15,6 +15,7 @@ settings = load_settings(ARGV[0])
 # run interactive visual range filtering & save final ranges into settings
 range_filtering(settings, true)
 
+# sum up settings
 puts "
 Final settings:
 	Address from: #{settings[:apixel_from]}
@@ -25,6 +26,7 @@ Final settings:
 	Row div: #{settings[:row_div_arg]}
 	Address div: #{settings[:addr_div_arg]}"
 
+# next steps
 tell_filter_ranges(settings)
 tell_attack_first_bytes(settings)
 puts

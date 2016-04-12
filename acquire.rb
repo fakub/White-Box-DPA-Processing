@@ -5,7 +5,7 @@ require "./tools/all.rb"
 # print help
 $stderr.puts("
 Usage:
-	$ ./#{File.basename(__FILE__)} attack_settings.yaml
+	$ ./#{File.basename(__FILE__)} <attack_settings.yaml>
 
 Copy '#{SETT_TEMPL_FILE}', modify the settings and run again with your settings file.
 
@@ -47,12 +47,12 @@ end
 save_settings(settings)
 
 
-# print hints what to do next
+# next steps
 puts "
 Have a look at a trace preview in
 	'#{settings.png_preview}'"
 
-tell_filter_ranges(settings)
 tell_manual_view(settings)
+tell_filter_ranges(settings)
 tell_attack_first_bytes(settings)
 puts

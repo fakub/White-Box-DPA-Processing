@@ -5,7 +5,7 @@ require "./tools/all.rb"
 # print help
 $stderr.puts("
 Usage:
-	$ ./#{File.basename(__FILE__)} name
+	$ ./#{File.basename(__FILE__)} <name>
 
 ") or exit if ARGV[0].nil?
 
@@ -25,11 +25,12 @@ mask = mask_from_file(settings.range_filter_file)
 filter(Dir["#{settings.bin_flt_traces_dir}/*"], mask, :bin)
 filter([settings.flt_txt_trace], mask, :txt)
 
-# rename traces
+# rename traces & save settings
 FileUtils.mv settings.flt_txt_trace, "#{File.dirname settings.flt_txt_trace}/#{File.basename(settings.flt_txt_trace, ".rge")}"
 FileUtils.mv "#{settings.flt_txt_trace}.flt", settings.flt_txt_trace
 save_settings(settings)
 
+# next steps
 puts "
 You can find filtered traces in
 	'#{settings.bin_flt_traces_dir}'"

@@ -5,36 +5,60 @@ require "./tools/all.rb"
 # print help
 $stderr.puts("
 Usage:
-	$ ./#{File.basename(__FILE__)} name attack_name (loc_limit=10.0 type=x0f outmode=txt(/latex) verbose=false)
+	$ ./#{File.basename(__FILE__)} <name> <attack_name> [10.0 x0f txt false]
+
+where
+	 10.0 ... limit for strong candidate
+	  x0f ... group targets by:
+	                nothing ... nil
+	               lin. map ... p
+	             1st 4 bits ... xf0
+	            last 4 bits ... x0f
+	  txt ... output mode (txt/latex)
+	false ... verbosity (true/false)
 
 ") or exit if ARGV[0].nil?
 
 # load settings
 settings = load_settings(ARGV[0])
 
+puts "
+See more settings by running
+	$ ./#{File.basename(__FILE__)}
+
+" if ARGV[2].nil?
+
+# read arguments
 arg_attn = ARGV[1]
-arg_loc_limit = ARGV[2]
+arg_strong_limit = ARGV[2]
 arg_type = ARGV[3]
 arg_outmode = ARGV[4]
 arg_verbose = ARGV[5]
-
-outmode = ["txt", "latex"].include?(arg_outmode) ? arg_outmode : "txt"
-emph = outmode == "latex" ? {true => "$\\blacksquare$", false => "$\\boxtimes$"} : {true => "\u2588", false => "\u259e", ltd: {true => "\u2584", false => " "}}
-# correct: "\u2592"
-verbose = arg_verbose.nil? ? true : arg_verbose == "true"
-loc_limit = (arg_loc_limit.to_f <= 0) ? 10.0 : arg_loc_limit.to_f
+# set limit for strong candidate
+strong_limit = (arg_strong_limit.to_f <= 0) ? 10.0 : arg_strong_limit.to_f
+# set target grouping type
 type = arg_type.nil? ? :x0f : arg_type.to_sym
+# set output mode & emphasizing symbols
+outmode = ["txt", "latex"].include?(arg_outmode) ? arg_outmode : "txt"
+emph = outmode == "latex" ? \
+         {true => "$\\blacksquare$", false => "$\\boxtimes$", ltd: {true => "$\\square$", false => " "}} : \
+         {true => "\u2588", false => "\u259e", ltd: {true => "\u2584", false => " "}}   # correct: "\u2592"
+# set verbosity
+verbose = arg_verbose.nil? ? true : arg_verbose == "true"
 
+# set path and terminal width
 path = "#{settings.attack_dir}/#{arg_attn}"
 line_len = 153
 
 # load processed results
 proc_res = YAML.load(File.read("#{path}_results.yaml"))
 
+# init
 cand_gaps = []
 leak_bit = [0] * 8
 target_group_leaks = {}
 
+#!# deprecated
 if outmode == "latex"
 	puts "\\hline"
 	#~ puts "\\multirow{2}{*}{Byte} & \\multicolumn{24}{c|}{Target bits} \\\\"
@@ -52,7 +76,7 @@ proc_res[:bytes].each.with_index do |byte_res, byte|
 		puts "–" * line_len
 	end
 	
-	long = byte_res[:targets].size > 16
+	long = byte_res[:targets].size >= 16
 	byte_res[:targets].sort.each do |target_str, target_res|
 		next if target_res.nil?
 		ctr += 1
@@ -68,7 +92,7 @@ proc_res[:bytes].each.with_index do |byte_res, byte|
 		true_cand_pos = target_res[:true_cand_pos]
 		correct = target_res[:correct]
 		
-		if gap > loc_limit
+		if gap > strong_limit
 			cand_gaps[byte] = {} if cand_gaps[byte].nil?
 			cand_gaps[byte][cand] = [] unless cand_gaps[byte].has_key? cand
 			cand_gaps[byte][cand] << gap
@@ -86,8 +110,8 @@ proc_res[:bytes].each.with_index do |byte_res, byte|
 			if outmode == "txt"
 				# readable output
 				em = correct ? \
-						(gap > loc_limit ? emph[true] : emph[:ltd][true]) : \
-						(gap > loc_limit ? emph[false] : emph[:ltd][false])
+						(gap > strong_limit ? emph[true] : emph[:ltd][true]) : \
+						(gap > strong_limit ? emph[false] : emph[:ltd][false])
 				if long
 					print "#{em}%2.0f" % [gap]
 					puts if ctr % 51 == 0
@@ -113,7 +137,7 @@ if outmode == "txt"
 	puts "\n   Overal results"
 	puts "=" * line_len
 	
-	puts " #{emph[true]} correct candidates' values byte-wise (out of 255):"
+	puts " #{emph[true]} byte-wise values of correct candidates (out of 255):"
 	true_cand_gaps = []
 	false_cand_gaps = []
 	second_n = []
@@ -203,3 +227,7 @@ if outmode == "txt"
 	puts gl_n.to_s
 	gl_n.print_hist
 end
+
+# next steps
+tell_the_end
+puts

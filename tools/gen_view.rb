@@ -1,6 +1,11 @@
+# generate trace preview in given address and row range
+# can split the trace automatically into several images
+
+# approx. half of maximum size
 GRAPH_HEIGHT = 0x1000
 GRAPH_WIDTH = 0x400
 
+# recursive method for adding a node to plot
 def add_node_to_plot(node, plot, addr_offset, row_offset, addr_div, row_div)
 	if node.has_key? :data
 		node[:data].each do |d|   # d ~ {row: row, addr: addr, length: words[2].hex, val: 1}
@@ -13,6 +18,8 @@ def add_node_to_plot(node, plot, addr_offset, row_offset, addr_div, row_div)
 	end
 end
 
+# generate view method itself
+# magic ...
 def gen_view(filename, addr_from, addr_to, line_from, line_to, split_files, row_div_arg, addr_div_arg, verbose = false)
 	puts "\nGenerating preview ..."
 	
@@ -40,10 +47,6 @@ def gen_view(filename, addr_from, addr_to, line_from, line_to, split_files, row_
 			node[:data] = [] if node[:data].nil?
 			node[:data] << {row: row, addr: addr, length: words[2].hex, val: 1}
 			
-			#~ node[:row] = row
-			#~ node[:addr] = addr
-			#~ node[:length] = words[2].hex
-			#~ # node[:val] = words[3].hex
 			node[:dumb0] = 0; node[:dumb1] = 0; node[:dumb2] = 0; node[:dumb3] = 0; node[:dumb4] = 0; node[:dumb5] = 0; node[:dumb6] = 0; node[:dumb7] = 0; node[:dumb8] = 0; node[:dumb9] = 0; node[:dumba] = 0; node[:dumbb] = 0; node[:dumbc] = 0; node[:dumbd] = 0; node[:dumbe] = 0; node[:dumbf] = 0;
 			
 			break if row > line_to

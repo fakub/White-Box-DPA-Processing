@@ -1,3 +1,5 @@
+#!#
+
 def addr_begin(pngfile)
 	pngfile.match(/__[0-9a-fA-F]{12}\-\-[0-9a-fA-F]{12}__[0-9]+?x[0-9]+?\.png/).to_s.split("--")[0][2..-1].hex
 end

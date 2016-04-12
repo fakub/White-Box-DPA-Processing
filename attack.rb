@@ -5,7 +5,7 @@ require "./tools/all.rb"
 # print help
 $stderr.puts("
 Usage:
-	$ ./#{File.basename(__FILE__)} name attack_name [-1 0 all 2b7e151628aed2a6abf7158809cf4f3c]
+	$ ./#{File.basename(__FILE__)} <name> <attack_name> [-1 0 all 2b7e151628aed2a6abf7158809cf4f3c]
 
 where
 	 -1 ... number of traces, -1 ~ all
@@ -18,26 +18,20 @@ where
 # load settings
 settings = load_settings(ARGV[0])
 
+# read arguments
 arg_attn = ARGV[1]
 arg_ntr = ARGV[2]
 arg_byte = ARGV[3]
 arg_target = ARGV[4]
 arg_key = ARGV[5]
-
 # set number of traces
-n_traces = (arg_ntr.to_i <= 0) ? settings[:n_traces] : arg_ntr.to_i
+n_traces = set_n_traces(arg_ntr)
 # set attacked key byte
-attack_byte = (0..15).include?(arg_byte.to_i) ? arg_byte.to_i : 0
+attack_byte = set_attack_byte(arg_byte)
 # set attack target
-target = arg_target.nil? ? "all" : arg_target
+target = set_target(arg_target)
 # set expected key
-if arg_key.nil? or (!arg_key.nil? and (arg_key[/\H/] or arg_key.length != 32))
-	$stderr.puts("Warning: invalid expected key. Using deafult key '#{GS[:default_key]}'") unless arg_key.nil?
-	exp_key_str = GS[:default_key]
-else
-	exp_key_str = arg_key
-end
-exp_key = [exp_key_str].pack("H*").unpack("C*")
+exp_key = set_exp_key(arg_key)
 
 # prepare attack directory
 path = "#{settings.attack_dir}/#{arg_attn}"
@@ -54,3 +48,7 @@ puts "Attacking #{attack_byte}. byte using #{n_traces} traces."
 	puts "\ttarget: #{target_str}"
 	run_attack(settings, arg_attn, n_traces, attack_byte, target_str, exp_key_str)
 end
+
+# next steps
+tell_results_process(settings, arg_attn)
+puts

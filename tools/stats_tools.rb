@@ -1,3 +1,5 @@
+# introduce some basic statistics tools for Enumerable and Hash
+
 module Enumerable
 	def sum
 		inject(0){|s,e|s+e}
@@ -57,7 +59,7 @@ end
 
 class Hash
 	def max_v
-		max_by{|k,v|v}[1]
+		empty? ? -Float::INFINITY : max_by{|k,v|v}[1]
 	end
 	
 	def print_hist(max_width = 100)

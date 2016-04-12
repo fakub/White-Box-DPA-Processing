@@ -1,3 +1,5 @@
+# keep all settings in single class
+
 class Settings
 	def acq
 		GS[:mode][self[:mode]]
