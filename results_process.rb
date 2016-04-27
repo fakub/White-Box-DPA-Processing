@@ -41,6 +41,7 @@ Dir["#{path}/*.yaml"].each do |res_filename|
 	n_traces, byte, target_str = File.basename(res_filename, ".yaml").split("_")
 	byte = byte.to_i
 	
+	# sample results (in YAML)
 	#~ 0:   # target bit, might be only one
 	#~ - - 0.5852212
 	#~   - 43   # expected

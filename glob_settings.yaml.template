@@ -1,0 +1,93 @@
+---
+
+# ==============================================================================
+# ===   YOUR SETUP
+# ==============================================================================
+
+# path to BitwiseDPA attack
+:path_to_cpp_attack: "../BitwiseDPA/main"
+
+# path to memory tracing tools (replace 'PIN-install-dir' with your actual PIN install directory, nothing else to be changed)
+:mode:
+  :ra:
+    :bin: "PIN-install-dir/pin -t PIN-install-dir/source/tools/MemoryTracingTools/obj-intel64/read_addr_bin.so --"
+    :txt: "PIN-install-dir/pin -t PIN-install-dir/source/tools/MemoryTracingTools/obj-intel64/read_addr_txt.so --"
+    :type: :ra
+    :trace_filename:
+      :bin: "read_addr"
+      :txt: "read_addr.txt"
+  :wc:
+    :bin: "PIN-install-dir/pin -t PIN-install-dir/source/tools/MemoryTracingTools/obj-intel64/write_cnt_bin.so --"
+    :txt: "PIN-install-dir/pin -t PIN-install-dir/source/tools/MemoryTracingTools/obj-intel64/write_cnt_txt.so --"
+    :type: :wc
+    :trace_filename:
+      :bin: "write_cnt"
+      :txt: "write_cnt.txt"
+  :rc:
+    :bin: "PIN-install-dir/pin -t PIN-install-dir/source/tools/MemoryTracingTools/obj-intel64/read_cnt_bin.so --"
+    :txt: "PIN-install-dir/pin -t PIN-install-dir/source/tools/MemoryTracingTools/obj-intel64/read_cnt_txt.so --"
+    :type: :rc
+    :trace_filename:
+      :bin: "read_cnt"
+      :txt: "read_cnt.txt"
+  :wa:
+    :bin: "PIN-install-dir/pin -t PIN-install-dir/source/tools/MemoryTracingTools/obj-intel64/write_addr_bin.so --"
+    :txt: "PIN-install-dir/pin -t PIN-install-dir/source/tools/MemoryTracingTools/obj-intel64/write_addr_txt.so --"
+    :type: :wa
+    :trace_filename:
+      :bin: "write_addr"
+      :txt: "write_addr.txt"
+  :none:
+    :bin: ""
+    :txt: ""
+    :type: :none
+    :trace_filename:
+      :bin: "tr_tab2"
+      :txt: "tr_tab2"
+
+# key that will be considered by default
+:default_key: "2b7e151628aed2a6abf7158809cf4f3c"
+
+
+# ==============================================================================
+# ===   CUSTOMIZE
+# ==============================================================================
+
+# number of dots in progress bars
+:n_dots_default: 100
+
+# default number of traces to acquire
+:n_traces_default: 32
+
+# bound for strong candidate
+:strong_cand_bound: 10.0
+
+# switch short/long results (for formatting purposes)
+:long_results: 15
+
+# set your terminal width
+:terminal_width: 153
+
+
+# ==============================================================================
+# ===   PREFERABLY DO NOT CHANGE !
+# ==============================================================================
+
+# global dirnames & filenames
+:sboxes_dir: "sboxes"
+:data_dir: "data"
+:traces_dir: "traces"
+:bin_subdir: "bin"
+:flt_traces_dir: "flt_traces"
+:settings_filename: "settings"
+:visual_dir: "visual"
+:man_view_dir: "man_view"
+:arf_dir: "ar_filter"
+:attack_dir: "attack"
+:cpp_attack_settings_dir: "cpp_attack_settings"
+:const_filter_filename: "const_filter"
+:range_filter_filename: "range_filter"
+
+# some global technical settings
+:addr_len: 6
+:n_for_filter: 32

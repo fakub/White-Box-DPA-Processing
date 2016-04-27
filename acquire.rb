@@ -37,10 +37,17 @@ merged = merge_traces(settings) if merge
 # acquire sample pt again to text & create preview
 unless merge and merged
 	get_txt_trace(settings)
-	settings[:png_filename] = File.basename gen_view(settings.txt_trace, 0, Float::INFINITY, 0, Float::INFINITY, 1, nil, nil).first
-	settings[:addr_beg] = addr_begin(settings[:png_filename])
-	settings[:addr_div] = addr_div(settings[:png_filename])
-	settings[:row_div] = row_div(settings[:png_filename])
+	begin
+		settings[:png_filename] = File.basename gen_view(settings.txt_trace, 0, Float::INFINITY, 0, Float::INFINITY, 1, nil, nil).first
+		settings[:addr_beg] = addr_begin(settings[:png_filename])
+		settings[:addr_div] = addr_div(settings[:png_filename])
+		settings[:row_div] = row_div(settings[:png_filename])
+	rescue
+		settings[:png_filename] = ""
+		settings[:addr_beg] = ""
+		settings[:addr_div] = ""
+		settings[:row_div] = ""
+	end
 end
 
 # save settings

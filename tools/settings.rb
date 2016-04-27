@@ -90,17 +90,6 @@ def gen_settings(filename)
 end
 
 def save_settings(settings)
-#~ def save_settings(settings, merge = true)
-	#~ # backup unless merge
-	#~ if File.exists?("#{GS[:settings_dir]}/#{settings[:name]}.yaml") and not merge
-		#~ FileUtils.mv "#{GS[:settings_dir]}/#{settings[:name]}.yaml", "#{GS[:settings_dir]}/#{settings[:name]}__bkp.yaml"
-	#~ end
-	#~ # set new n_traces if merge
-	#~ if merge
-		#~ settings[:n_traces] = Dir["#{GS[:traces_dir]}/#{settings[:name]}/*"].size if merge
-		#~ settings.n_dots = settings[:n_traces] < GS[:n_dots_default] ? settings[:n_traces] : GS[:n_dots_default]
-	#~ end
-	#~ File.write("#{GS[:settings_dir]}/#{settings[:name]}.yaml", YAML.dump(settings))
 	File.write(settings.settings_file, YAML.dump(settings.hash))
 end
 

@@ -6,15 +6,15 @@
 # 	:wc  ... Write Contents
 :mode: :ra
 
-# :cmd: ... Command which encrypts provided plaintext (in hex)
+# :cmd: ... Command that encrypts provided hex plaintext
 # 	e.g. if `./wbaes --wbfile ./tables.dat b4496f7af46023c90068fbc8f6e00609` outputs "88083BD26B4F459EBB35B588B0CE93AF",
 # 	then :cmd: will be "./wbaes --wbfile ./tables.dat"
-:cmd: "/path/to/my-AES-implementation"
+:cmd: "path/to/my-AES-implementation"
 
 # :ct_row: ... Which row of output carries ciphertext
 :ct_row: 1
 
-# :name: ... Name of your attack
+# :name: ... Name your attack
 :name: "my_attack"
 
 # :n_traces: ... Number of traces to be acquired. The attack does not need to use them all

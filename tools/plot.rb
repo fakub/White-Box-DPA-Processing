@@ -1,5 +1,4 @@
 # class handling image
-# don't ask me why ...
 # magic ...
 
 require 'rmagick'
@@ -67,47 +66,4 @@ class Plot
 		img.write("png:" + filename)
 		
 	end
-	
-	#~ def dump_dat(filename)
-		#~ File.open("./plots/files/" + filename + ".dat", 'w') do |f|
-			#~ w = width
-			#~ @lines.each do |l|
-				#~ if l.nil?
-					#~ f.write("  0\t" * w + "\n")
-				#~ else
-					#~ l.each do |e|
-						#~ f.write(e.nil? ? "  0\t" : ("%3d\t" % e))
-					#~ end
-					#~ f.write("  0\t" * (w - l.length) + "\n")
-				#~ end
-			#~ end
-		#~ end
-	#~ end
-	#~ 
-	#~ def gen_gnp(filename, margin = 1)
-		#~ File.open("./plots/files/" + filename + ".gnp", "w") do |f|
-			#~ f.write(
-#~ "reset
-#~ 
-#~ set lmargin 0
-#~ set rmargin 0
-#~ set tmargin 0
-#~ set bmargin 0
-#~ unset key
-#~ unset tics
-#~ unset colorbox
-#~ unset border
-#~ 
-#~ set term png nocrop size " + (width + 2 * margin).to_s + "," + (height + 2 * margin).to_s + "
-#~ set xrange [-" + (margin+1).to_s + ":" + (width  + margin - 1).to_s + "]
-#~ set yrange [-" + (margin+1).to_s + ":" + (height + margin - 1).to_s + "] reverse
-#~ set cbrange [0:" + max.to_s + "]
-#~ 
-#~ set out './plots/" + filename + ".png'
-#~ plot './plots/files/" + filename + ".dat' matrix with image
-#~ 
-#~ set term wxt"
-			#~ )
-		#~ end
-	#~ end
 end

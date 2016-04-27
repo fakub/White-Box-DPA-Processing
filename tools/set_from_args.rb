@@ -1,4 +1,6 @@
-def set_n_traces(arg_ntr)
+# set variables from arguments
+
+def set_n_traces(arg_ntr, settings)
 	(arg_ntr.to_i <= 0) ? settings[:n_traces] : arg_ntr.to_i
 end
 

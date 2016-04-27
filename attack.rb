@@ -25,7 +25,7 @@ arg_byte = ARGV[3]
 arg_target = ARGV[4]
 arg_key = ARGV[5]
 # set number of traces
-n_traces = set_n_traces(arg_ntr)
+n_traces = set_n_traces(arg_ntr, settings)
 # set attacked key byte
 attack_byte = set_attack_byte(arg_byte)
 # set attack target
@@ -46,7 +46,8 @@ puts "Attacking #{attack_byte}. byte using #{n_traces} traces."
 	target_file = "#{GS[:sboxes_dir]}/#{target_str}"
 	raise "Invalid target! File #{target_file} not found." unless File.exists?(target_file)
 	puts "\ttarget: #{target_str}"
-	run_attack(settings, arg_attn, n_traces, attack_byte, target_str, exp_key_str)
+	# ATTACK !!!
+	run_attack(settings, arg_attn, n_traces, attack_byte, target_str, exp_key)
 end
 
 # next steps
