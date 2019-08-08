@@ -5,13 +5,13 @@ require "./tools/all.rb"
 # print help
 $stderr.puts("
 Usage:
-	$ ./#{File.basename(__FILE__)} <name> <attack_name> [-1 0 all 2b7e151628aed2a6abf7158809cf4f3c]
+    $ ./#{File.basename(__FILE__)} <name> <attack_name> [-1 0 all 2b7e151628aed2a6abf7158809cf4f3c]
 
 where
-	 -1 ... number of traces, -1 ~ all
-	  0 ... key byte, from range 0..15
-	all ... attack target: all or 0x?? from '#{GS[:sboxes_dir]}' directory
-	2b7e... expected key
+     -1 ... number of traces, -1 ~ all
+      0 ... key byte, from range 0..15
+    all ... attack target: all or 0x?? from '#{GS[:sboxes_dir]}' directory
+    2b7e... expected key
 
 ") or exit if ARGV[0].nil?
 
@@ -41,13 +41,13 @@ FileUtils.mkpath(path)
 puts "Attacking #{attack_byte}. byte using #{n_traces} traces."
 
 256.times do |target_int|
-	next if (target != "all") ^ (target_int == 0)
-	target_str = target == "all" ? "0b%08b" % [target_int] : target
-	target_file = "#{GS[:sboxes_dir]}/#{target_str}"
-	raise "Invalid target! File #{target_file} not found." unless File.exists?(target_file)
-	puts "\ttarget: #{target_str}"
-	# ATTACK !!!
-	run_attack(settings, arg_attn, n_traces, attack_byte, target_str, exp_key)
+    next if (target != "all") ^ (target_int == 0)
+    target_str = target == "all" ? "0b%08b" % [target_int] : target
+    target_file = "#{GS[:sboxes_dir]}/#{target_str}"
+    raise "Invalid target! File #{target_file} not found." unless File.exists?(target_file)
+    puts "\ttarget: #{target_str}"
+    # ATTACK !!!
+    run_attack(settings, arg_attn, n_traces, attack_byte, target_str, exp_key)
 end
 
 # next steps

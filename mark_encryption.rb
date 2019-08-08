@@ -5,13 +5,13 @@ require "./tools/all.rb"
 # print help
 $stderr.puts("
 Usage:
-	$ ./#{File.basename(__FILE__)} <name> <attack_name> [-1 0 0b00000001 0]
+    $ ./#{File.basename(__FILE__)} <name> <attack_name> [-1 0 0b00000001 0]
 
 where
-	        -1 ... number of traces, -1 ~ all
-	         0 ... key byte, from range 0..15
-	0b00000001 ... successful target
-	         0 ... target bit (if applicable)
+            -1 ... number of traces, -1 ~ all
+             0 ... key byte, from range 0..15
+    0b00000001 ... successful target
+             0 ... target bit (if applicable)
 
 ") or exit if ARGV[0].nil?
 
@@ -25,7 +25,7 @@ arg_byte = ARGV[3]
 arg_target = ARGV[4]
 arg_tbit = ARGV[5]
 # set number of traces
-n_traces = set_n_traces(arg_ntr)
+n_traces = set_n_traces(arg_ntr,settings)
 # set attacked key byte
 attack_byte = set_attack_byte(arg_byte)
 # set attack target
@@ -37,10 +37,10 @@ tbit = (0..7).include?(arg_tbit.to_i) ? arg_tbit.to_i : 0
 filename = "#{settings.attack_dir}/#{arg_attn}/#{n_traces}_#{attack_byte}_#{target}.yaml"
 raise "
 Results do not exist for
-	attack_name = '#{arg_attn}',
-	   n_traces = #{n_traces},
-	       byte = #{attack_byte},
-	     target = #{target}." unless File.exists? filename
+    attack_name = '#{arg_attn}',
+       n_traces = #{n_traces},
+           byte = #{attack_byte},
+         target = #{target}." unless File.exists? filename
 position = YAML.load(File.read filename)[tbit].first[2]
 
 # emphasize
@@ -54,13 +54,13 @@ mask = mask_from_file(settings.range_filter_file) if settings.attack_range_flt
 
 position /= 8
 if settings.attack_range_flt
-	cnt = 0
-	mask.each.with_index do |tf,i|
-		next unless tf
-		(cnt = i and break) if cnt == position
-		cnt += 1
-	end
-	position = cnt
+    cnt = 0
+    mask.each.with_index do |tf,i|
+        next unless tf
+        (cnt = i and break) if cnt == position
+        cnt += 1
+    end
+    position = cnt
 end
 
 addrrow = [IO.readlines(settings.txt_trace)[position].split[1].hex, position]
@@ -73,7 +73,7 @@ emph_in_image(apixel, rpixel, 120, emphed)
 # next steps
 puts "
 See
-	'#{emphed}'
+    '#{emphed}'
  – this is probably where #{attack_byte}. key byte leaks using #{n_traces} traces and #{target} as target."
 
 tell_filter_ranges(settings)

@@ -5,7 +5,7 @@ require "./tools/all.rb"
 # print help
 $stderr.puts("
 Usage:
-	$ ./#{File.basename(__FILE__)} <attack_settings.yaml>
+    $ ./#{File.basename(__FILE__)} <attack_settings.yaml>
 
 Copy '#{SETT_TEMPL_FILE}', modify the settings and run again with your settings file.
 
@@ -20,7 +20,7 @@ Is ASLR really OFF? (Y/n) ")
 isoff = $stdin.gets.chomp
 $stderr.puts("
 Consider
-	$ setarch `uname -m` -R /bin/bash
+    $ setarch `uname -m` -R /bin/bash
 
 ") or exit unless isoff == "Y"
 
@@ -36,18 +36,18 @@ merged = merge_traces(settings) if merge
 
 # acquire sample pt again to text & create preview
 unless merge and merged
-	get_txt_trace(settings)
-	begin
-		settings[:png_filename] = File.basename gen_view(settings.txt_trace, 0, Float::INFINITY, 0, Float::INFINITY, 1, nil, nil).first
-		settings[:addr_beg] = addr_begin(settings[:png_filename])
-		settings[:addr_div] = addr_div(settings[:png_filename])
-		settings[:row_div] = row_div(settings[:png_filename])
-	rescue
-		settings[:png_filename] = ""
-		settings[:addr_beg] = ""
-		settings[:addr_div] = ""
-		settings[:row_div] = ""
-	end
+    get_txt_trace(settings)
+    begin
+        settings[:png_filename] = File.basename gen_view(settings.txt_trace, 0, Float::INFINITY, 0, Float::INFINITY, 1, nil, nil).first
+        settings[:addr_beg] = addr_begin(settings[:png_filename])
+        settings[:addr_div] = addr_div(settings[:png_filename])
+        settings[:row_div] = row_div(settings[:png_filename])
+    rescue
+        settings[:png_filename] = ""
+        settings[:addr_beg] = ""
+        settings[:addr_div] = ""
+        settings[:row_div] = ""
+    end
 end
 
 # save settings
@@ -57,7 +57,7 @@ save_settings(settings)
 # next steps
 puts "
 Have a look at a trace preview in
-	'#{settings.png_preview}'"
+    '#{settings.png_preview}'"
 
 tell_manual_view(settings)
 tell_filter_ranges(settings)

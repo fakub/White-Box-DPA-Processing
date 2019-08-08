@@ -90,4 +90,4 @@
 
 # some global technical settings
 :addr_len: 6
-:n_for_filter: 32
+:n_for_filter: 30
